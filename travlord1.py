@@ -76,7 +76,7 @@ class Ui_MainWindow(object):
         self.driver.get(world)
         emailxpath = "//input[@name='name']"  # Replace with your desired XPath
         passwordxpath = "//input[@name='password']"
-
+        loginbuttonxpath= "//button[@type='submit']"
         wait = WebDriverWait(self.driver, 10)
         
         element = wait.until(EC.visibility_of_element_located((By.XPATH, emailxpath)))
@@ -86,7 +86,7 @@ class Ui_MainWindow(object):
         self.loggedin = True
         self.driverloop()
 
-    def driverloop(self):
+    def driverloop(self ):
         while(self.loggedin):
             sleep(2)
     def login(self,mail,passwd):
