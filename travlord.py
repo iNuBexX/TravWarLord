@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'TravLord_Login.ui'
+# Form implementation generated from reading ui file '.\TravLord_Login.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -32,9 +32,6 @@ class Ui_TravLegendsWarLord(object):
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(230, 210, 161, 21))
-        self.label_2.setStyleSheet("color: rgb(255, 255, 255);")
-        self.label_2.setFrameShape(QtWidgets.QFrame.Box)
-        self.label_2.setFrameShadow(QtWidgets.QFrame.Raised)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label_2.setFont(font)
@@ -49,7 +46,6 @@ class Ui_TravLegendsWarLord(object):
         self.inputemail.setSizeIncrement(QtCore.QSize(10, 10))
         self.inputemail.setLineWidth(2)
         self.inputemail.setObjectName("inputemail")
-        self.inputemail.setStyleSheet("color: rgb(255, 255, 255);")
         self.inputpassword = QtWidgets.QLineEdit(self.centralwidget)
         self.inputpassword.setGeometry(QtCore.QRect(260, 240, 191, 31))
         self.inputpassword.setEchoMode(QtWidgets.QLineEdit.Password)

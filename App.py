@@ -9,9 +9,7 @@ import threading
 
 
 class App:
-    def __init__(self,ui):
-        self.ui=ui
-        self.ui.buttonlogin.clicked.connect(lambda: self.loginclicked(ui))
+
     def InitializeUI():
         
         pass
@@ -51,9 +49,10 @@ if __name__ == "__main__":
     ui = trav.Ui_TravLegendsWarLord()
     
     ui.setupUi(MainWindow)
+    ui.buttonlogin.clicked.connect(lambda: App.loginclicked(ui))
 
-    app = App(ui)
-
+    #app = App()
+   
     
     MainWindow.show()
     
