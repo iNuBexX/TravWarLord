@@ -11,28 +11,46 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(809, 505)
-        self.centralwidget = QtWidgets.QWidget(MainWindow)
+class Ui_TravLegendsWarLord(object):
+    def setupUi(self, TravLegendsWarLord):
+        TravLegendsWarLord.setObjectName("TravLegendsWarLord")
+        TravLegendsWarLord.setEnabled(True)
+        TravLegendsWarLord.resize(736, 662)
+        TravLegendsWarLord.setMinimumSize(QtCore.QSize(500, 500))
+        TravLegendsWarLord.setWindowOpacity(100.0)
+        TravLegendsWarLord.setStyleSheet("background-image: url(login.png);")
+        self.centralwidget = QtWidgets.QWidget(TravLegendsWarLord)
         self.centralwidget.setObjectName("centralwidget")
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(230, 130, 251, 21))
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label.setFont(font)
+        self.label.setStyleSheet("color: rgb(255, 255, 255);")
+        self.label.setFrameShape(QtWidgets.QFrame.Box)
+        self.label.setFrameShadow(QtWidgets.QFrame.Raised)
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(230, 210, 161, 21))
+        self.label_2.setStyleSheet("color: rgb(255, 255, 255);")
+        self.label_2.setFrameShape(QtWidgets.QFrame.Box)
+        self.label_2.setFrameShadow(QtWidgets.QFrame.Raised)
         font = QtGui.QFont()
         font.setPointSize(12)
         self.label_2.setFont(font)
         self.label_2.setObjectName("label_2")
         self.inputemail = QtWidgets.QPlainTextEdit(self.centralwidget)
         self.inputemail.setGeometry(QtCore.QRect(260, 160, 191, 31))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.inputemail.sizePolicy().hasHeightForWidth())
+        self.inputemail.setSizePolicy(sizePolicy)
+        self.inputemail.setSizeIncrement(QtCore.QSize(10, 10))
+        self.inputemail.setLineWidth(2)
         self.inputemail.setObjectName("inputemail")
-        self.inputpassword = QtWidgets.QLineEdit(self.centralwidget) #password
+        self.inputemail.setStyleSheet("color: rgb(255, 255, 255);")
+        self.inputpassword = QtWidgets.QLineEdit(self.centralwidget)
         self.inputpassword.setGeometry(QtCore.QRect(260, 240, 191, 31))
         self.inputpassword.setEchoMode(QtWidgets.QLineEdit.Password)
         self.inputpassword.setObjectName("inputpassword")
@@ -42,44 +60,30 @@ class Ui_MainWindow(object):
         self.checkBox = QtWidgets.QCheckBox(self.centralwidget)
         self.checkBox.setGeometry(QtCore.QRect(230, 300, 91, 17))
         self.checkBox.setObjectName("checkBox")
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 809, 21))
+        self.world = QtWidgets.QPlainTextEdit(self.centralwidget)
+        self.world.setGeometry(QtCore.QRect(110, 360, 491, 31))
+        self.world.setObjectName("world")
+        TravLegendsWarLord.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(TravLegendsWarLord)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 736, 21))
         self.menubar.setObjectName("menubar")
         self.menufile = QtWidgets.QMenu(self.menubar)
         self.menufile.setObjectName("menufile")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        TravLegendsWarLord.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(TravLegendsWarLord)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+        TravLegendsWarLord.setStatusBar(self.statusbar)
         self.menubar.addAction(self.menufile.menuAction())
 
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        self.actionNew.triggered.connect(lambda: self.clicked("login was clicked"))
+        self.retranslateUi(TravLegendsWarLord)
+        QtCore.QMetaObject.connectSlotsByName(TravLegendsWarLord)
 
-    def retranslateUi(self, MainWindow):
+    def retranslateUi(self, TravLegendsWarLord):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.label.setText(_translate("MainWindow", "Account name or e-mail address :"))
-        self.label_2.setText(_translate("MainWindow", "Password :"))
-        self.buttonlogin.setText(_translate("MainWindow", "login"))
-        self.checkBox.setText(_translate("MainWindow", "remember me"))
-        self.menufile.setTitle(_translate("MainWindow", "file"))
-    def clicked(self,text):
-        self.label.setText(text)
-        self.label.adjustSize()
-
-    def login(self,mail,passwd):
-        
-
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+        TravLegendsWarLord.setWindowTitle(_translate("TravLegendsWarLord", "MainWindow"))
+        self.label.setText(_translate("TravLegendsWarLord", "Account name or e-mail address :"))
+        self.label_2.setText(_translate("TravLegendsWarLord", "Password :"))
+        self.buttonlogin.setText(_translate("TravLegendsWarLord", "login"))
+        self.checkBox.setText(_translate("TravLegendsWarLord", "remember me"))
+        self.menufile.setTitle(_translate("TravLegendsWarLord", "file"))
+import image_rc
