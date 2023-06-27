@@ -19,6 +19,7 @@ class Ui_TravLegendsWarLord(object):
         TravLegendsWarLord.setMinimumSize(QtCore.QSize(500, 500))
         TravLegendsWarLord.setWindowOpacity(100.0)
         TravLegendsWarLord.setStyleSheet("background-image: url(login.png);")
+
         self.centralwidget = QtWidgets.QWidget(TravLegendsWarLord)
         self.centralwidget.setObjectName("centralwidget")
         self.labelEmail = QtWidgets.QLabel(self.centralwidget)
@@ -30,28 +31,34 @@ class Ui_TravLegendsWarLord(object):
         self.labelEmail.setFrameShape(QtWidgets.QFrame.Box)
         self.labelEmail.setFrameShadow(QtWidgets.QFrame.Raised)
         self.labelEmail.setObjectName("labelEmail")
+
         self.labelPassword = QtWidgets.QLabel(self.centralwidget)
         self.labelPassword.setGeometry(QtCore.QRect(320, 210, 91, 41))
+
         font = QtGui.QFont()
         font.setPointSize(12)
         self.labelPassword.setFont(font)
         self.labelPassword.setFrameShape(QtWidgets.QFrame.Box)
         self.labelPassword.setFrameShadow(QtWidgets.QFrame.Raised)
         self.labelPassword.setObjectName("labelPassword")
+
         self.inputemail = QtWidgets.QPlainTextEdit(self.centralwidget)
         self.inputemail.setGeometry(QtCore.QRect(270, 170, 191, 31))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.inputemail.sizePolicy().hasHeightForWidth())
+        
         self.inputemail.setSizePolicy(sizePolicy)
         self.inputemail.setSizeIncrement(QtCore.QSize(10, 10))
         self.inputemail.setLineWidth(2)
         self.inputemail.setObjectName("inputemail")
+
         self.inputpassword = QtWidgets.QLineEdit(self.centralwidget)
         self.inputpassword.setGeometry(QtCore.QRect(270, 260, 191, 31))
         self.inputpassword.setEchoMode(QtWidgets.QLineEdit.Password)
         self.inputpassword.setObjectName("inputpassword")
+
         self.buttonlogin = QtWidgets.QPushButton(self.centralwidget)
         self.buttonlogin.setGeometry(QtCore.QRect(420, 320, 75, 23))
         self.buttonlogin.setObjectName("buttonlogin")

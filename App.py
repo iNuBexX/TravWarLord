@@ -46,11 +46,32 @@ class AppController:
 class myMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.labelEmailInitWidth=230
-        self.labelEmailInitHeight=110
-        self.labelPassword=
-        self.button = QPushButton("Move Me", self)
-        self.button.setGeometry(10, 10, 100, 100)
+        #MainWindow
+        self.mainWindowInitsize = {'y':800,'x':800}
+        #Email label
+        self.labelEmailInitPos = {'y':200,'x':200}
+        self.labelEmailInitSize = {'y':251,'x':41}
+        #Email input
+        self.inputEmailInitPos = {'y':280,'x':200}
+        self.inputEmailInitSize = {'y':191,'x':41}
+        #Password Label
+        self.labelPasswordInitPos = {'y':350,'x':170} 
+        self.labelPasswordInitSize = {'y':251,'x':41}
+        #Password Input
+        self.inputPasswordInitPos = {'y':430,'x':260}
+        self.inputPasswordInitSize = {'y':191,'x':41}
+        #Login Button
+        self.buttonLoginInitPos = {'y':500,'x':420}
+        self.buttonLoginInitSize = {'y':23,'x':75}
+        #World choice
+        self.inputWorldInitPos = {'y':600,'x':100}
+        self.inputWorldInitSize = {'y':35,'x':490}
+        #Remember me ?
+        self.checkBoxRememberMeInitPos = {'y':500,'x':300}
+        self.checkBoxRememberMeInitSize = {'y':20,'x':90}
+
+
+
         self.setupUi(self)
 
     def resizeEvent(self, event):
@@ -58,50 +79,51 @@ class myMainWindow(QMainWindow):
         new_size = event.size()
      
         # Calculate the new position for the button
-        new_x = new_size.width() - self.button.width() - 10
-        new_y = new_size.height() - self.button.height() - 10
-
         # Set the new position for the button
         #self.inputemail.move(new_size.width() - self.inputemail.width() - 230,new_size.height() - self.inputemail.height() -170 )
-        self.inputemail.move(int(new_size.width()/2),int(new_size.height()/2))        
+   
+        self.inputemail.move(int(new_size.width()/2-self.inputEmailInitSize['y']/2),int(new_size.height()*(self.inputEmailInitPos['y']/self.mainWindowInitsize['y'])))        
         #self.labelEmail.move(new_size.width() - self.labelEmail.width() - self.labelEmailInitWidth,new_size.height() - self.inputemail.height() -self.labelEmailInitHeight )
-        self.labelEmail.move(int(new_size.width()/2),int(new_size.height()/2))  
-        self.button.move(new_x, new_y)
+        self.labelEmail.move(int(new_size.width()/2-self.labelEmailInitSize['y']/2),int(new_size.height()*(self.labelEmailInitPos['y']/self.mainWindowInitsize['y']))) 
+       
+        self.inputpassword.move(int(new_size.width()/2-self.inputPasswordInitSize['y']/2),int(new_size.height()*(self.inputPasswordInitPos['y']/self.mainWindowInitsize['y']))) 
+       
+        self.labelPassword.move(int(new_size.width()/2-self.labelPasswordInitSize['y']/2),int(new_size.height()*(self.labelPasswordInitPos['y']/self.mainWindowInitsize['y']))) 
+       
+        self.buttonlogin.move(int(new_size.width()*(self.buttonLoginInitPos['x']/self.mainWindowInitsize['x'])),int(new_size.height()*(self.buttonLoginInitPos['y']/self.mainWindowInitsize['y']))) 
+       
+        #self.checkBox.move(int(new_size.width()*(self.checkBoxRememberMeInitPos['x']/self.mainWindowInitsize['x'])),int(new_size.height()*(self.checkBoxRememberMeInitPos['y']/self.mainWindowInitsize['y']))) 
+        self.checkBox.move(int(new_size.width()/2-self.checkBoxRememberMeInitSize['x']),int(new_size.height()*(self.checkBoxRememberMeInitPos['y']/self.mainWindowInitsize['y']))) 
+       
+        self.world.move(int(new_size.width()/2-self.inputWorldInitSize['x']/2),int(new_size.height()*(self.inputWorldInitPos['y']/self.mainWindowInitsize['y']))) 
+       
+        #print(self.labelEmailInitPos.ge)
+        #self.button.move(new_x, new_y)
     
         pass
     def setupUi(self, TravLegendsWarLord):
         TravLegendsWarLord.setObjectName("TravLegendsWarLord")
         TravLegendsWarLord.setEnabled(True)
-        TravLegendsWarLord.resize(800, 800)
+        TravLegendsWarLord.resize(self.mainWindowInitsize['y'], self.mainWindowInitsize['x'])
         TravLegendsWarLord.setMinimumSize(QtCore.QSize(500, 500))
         TravLegendsWarLord.setWindowOpacity(100.0)
         TravLegendsWarLord.setStyleSheet("background-image: url(login.png);")
         self.centralwidget = QtWidgets.QWidget(TravLegendsWarLord)
         self.centralwidget.setObjectName("centralwidget")
-        self.labelEmail = QtWidgets.QLabel(self.centralwidget)
-        self.labelEmail.setGeometry(QtCore.QRect(self.labelEmailInitWidth, self.labelEmailInitHeight, 251, 41))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.labelEmail.setFont(font)
-        self.labelEmail.setStyleSheet("color: rgb(255, 255, 255);")
-        self.labelEmail.setFrameShape(QtWidgets.QFrame.Box)
-        self.labelEmail.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.labelEmail.setObjectName("labelEmail")
+    
         self.labelPassword = QtWidgets.QLabel(self.centralwidget)
-        self.labelPassword.setGeometry(QtCore.QRect(230, 210, 251, 41))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        self.labelPassword.setFont(font)
-        self.labelPassword.setFrameShape(QtWidgets.QFrame.Box)
-        self.labelPassword.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.labelPassword.setObjectName("labelPassword")
+        #self.labelPassword.setGeometry(QtCore.QRect(230, 210, 251, 41))
+        self.labelEmail = QtWidgets.QLabel(self.centralwidget)
+        #self.labelEmail.setGeometry(QtCore.QRect(self.labelEmailInitSize['x'], self.labelEmailInitSize['y'], 251, 41))
+
+
+
+
         self.inputemail = QtWidgets.QPlainTextEdit(self.centralwidget)
-        self.inputemail.setGeometry(QtCore.QRect(230, 170, 191, 31))
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.inputemail.sizePolicy().hasHeightForWidth())
-        self.inputemail.setSizePolicy(sizePolicy)
+        self.inputemail.setGeometry(QtCore.QRect(self.inputEmailInitPos['y'], self.inputEmailInitPos['x'], 191, 31))
+
+
+       
         self.inputemail.setSizeIncrement(QtCore.QSize(10, 10))
         self.inputemail.setLineWidth(2)
         self.inputemail.setObjectName("inputemail")
@@ -109,8 +131,9 @@ class myMainWindow(QMainWindow):
         self.inputpassword.setGeometry(QtCore.QRect(230, 260, 191, 31))
         self.inputpassword.setEchoMode(QtWidgets.QLineEdit.Password)
         self.inputpassword.setObjectName("inputpassword")
+        
         self.buttonlogin = QtWidgets.QPushButton(self.centralwidget)
-        self.buttonlogin.setGeometry(QtCore.QRect(420, 300, 75, 23))
+        self.buttonlogin.setGeometry(QtCore.QRect(self.buttonLoginInitPos['x'],self.buttonLoginInitPos['y'], self.buttonLoginInitSize['x'], self.buttonLoginInitSize['y']))
         self.buttonlogin.setObjectName("buttonlogin")
         self.checkBox = QtWidgets.QCheckBox(self.centralwidget)
         self.checkBox.setGeometry(QtCore.QRect(250, 320, 91, 17))
@@ -129,6 +152,8 @@ class myMainWindow(QMainWindow):
         self.statusbar.setObjectName("statusbar")
         TravLegendsWarLord.setStatusBar(self.statusbar)
         self.menubar.addAction(self.menufile.menuAction())
+        self.labelEmail=self.labelstyleup(self.labelEmail,"labelEmail")
+        self.labelPassword=self.labelstyleup(self.labelPassword,"labelPassword")
 
         self.retranslateUi(TravLegendsWarLord)
         QtCore.QMetaObject.connectSlotsByName(TravLegendsWarLord)
@@ -141,6 +166,17 @@ class myMainWindow(QMainWindow):
         self.buttonlogin.setText(_translate("TravLegendsWarLord", "login"))
         self.checkBox.setText(_translate("TravLegendsWarLord", "remember me"))
         self.menufile.setTitle(_translate("TravLegendsWarLord", "file"))
+    def labelstyleup(self,widget,name):
+        widget = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        widget.setFont(font)
+        widget.setStyleSheet("color: rgb(255, 255, 255);")
+        widget.setFrameShape(QtWidgets.QFrame.Box)
+        widget.setFrameShadow(QtWidgets.QFrame.Raised)
+        widget.setObjectName(name)
+        return widget
+
 
 if __name__ == "__main__":
     import sys
