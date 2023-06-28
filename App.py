@@ -47,30 +47,30 @@ class myMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         #MainWindow
-        self.mainWindowInitsize = {'y':800,'x':800}
+        self.mainWindowInitsize = {'x':800,'y':800}
         #Email label
-        self.labelEmailInitPos = {'y':200,'x':200}
-        self.labelEmailInitSize = {'y':251,'x':41}
+        self.labelEmailInitPos = {'x':200,'y':200}
+        self.labelEmailInitSize = {'x':251,'y':41}
         #Email input
-        self.inputEmailInitPos = {'y':280,'x':200}
-        self.inputEmailInitSize = {'y':191,'x':41}
+        self.inputEmailInitPos = {'x':200,'y':280}
+        self.inputEmailInitSize = {'x':191,'y':41}
         #Password Label
-        self.labelPasswordInitPos = {'y':350,'x':170} 
-        self.labelPasswordInitSize = {'y':251,'x':41}
+        self.labelPasswordInitPos = {'x':170,'y':350} 
+        self.labelPasswordInitSize = {'x':91,'y':41}
         #Password Input
-        self.inputPasswordInitPos = {'y':430,'x':260}
-        self.inputPasswordInitSize = {'y':191,'x':41}
+        self.inputPasswordInitPos = {'x':260,'y':430}
+        self.inputPasswordInitSize = {'x':191,'y':41}
         #Login Button
-        self.buttonLoginInitPos = {'y':500,'x':420}
-        self.buttonLoginInitSize = {'y':23,'x':75}
+        self.buttonLoginInitPos = {'x':420,'y':500}
+        self.buttonLoginInitSize = {'x':75,'y':23}
         #World choice
-        self.inputWorldInitPos = {'y':600,'x':100}
-        self.inputWorldInitSize = {'y':35,'x':490}
+        self.inputWorldInitPos = {'x':100,'y':615}
+        self.inputWorldInitSize = {'x':490,'y':35}
         #Remember me ?
-        self.checkBoxRememberMeInitPos = {'y':500,'x':300}
-        self.checkBoxRememberMeInitSize = {'y':20,'x':90}
+        self.checkBoxRememberMeInitPos = {'x':300,'y':503}
+        self.checkBoxRememberMeInitSize = {'x':90,'y':20}
 
-
+        self.labelWorld = {'x':170,'y':590} 
 
         self.setupUi(self)
 
@@ -80,19 +80,18 @@ class myMainWindow(QMainWindow):
      
         # Calculate the new position for the button
         # Set the new position for the button
-        #self.inputemail.move(new_size.width() - self.inputemail.width() - 230,new_size.height() - self.inputemail.height() -170 )
+        #self.inputEmail.move(new_size.width() - self.inputEmail.width() - 230,new_size.height() - self.inputEmail.height() -170 )
    
-        self.inputemail.move(int(new_size.width()/2-self.inputEmailInitSize['y']/2),int(new_size.height()*(self.inputEmailInitPos['y']/self.mainWindowInitsize['y'])))        
-        #self.labelEmail.move(new_size.width() - self.labelEmail.width() - self.labelEmailInitWidth,new_size.height() - self.inputemail.height() -self.labelEmailInitHeight )
-        self.labelEmail.move(int(new_size.width()/2-self.labelEmailInitSize['y']/2),int(new_size.height()*(self.labelEmailInitPos['y']/self.mainWindowInitsize['y']))) 
+        self.inputEmail.move(int(new_size.width()/2-self.inputEmailInitSize['x']/2),int(new_size.height()*(self.inputEmailInitPos['y']/self.mainWindowInitsize['y'])))        
+        #self.labelEmail.move(new_size.width() - self.labelEmail.width() - self.labelEmailInitWidth,new_size.height() - self.inputEmail.height() -self.labelEmailInitHeight )
+        self.labelEmail.move(int(new_size.width()/2-self.labelEmailInitSize['x']/2),int(new_size.height()*(self.labelEmailInitPos['y']/self.mainWindowInitsize['y']))) 
        
-        self.inputpassword.move(int(new_size.width()/2-self.inputPasswordInitSize['y']/2),int(new_size.height()*(self.inputPasswordInitPos['y']/self.mainWindowInitsize['y']))) 
+        self.inputPassword.move(int(new_size.width()/2-self.inputPasswordInitSize['x']/2),int(new_size.height()*(self.inputPasswordInitPos['y']/self.mainWindowInitsize['y']))) 
        
-        self.labelPassword.move(int(new_size.width()/2-self.labelPasswordInitSize['y']/2),int(new_size.height()*(self.labelPasswordInitPos['y']/self.mainWindowInitsize['y']))) 
+        self.labelPassword.move(int(new_size.width()/2-self.labelPasswordInitSize['x']/2),int(new_size.height()*(self.labelPasswordInitPos['y']/self.mainWindowInitsize['y']))) 
        
         self.buttonlogin.move(int(new_size.width()*(self.buttonLoginInitPos['x']/self.mainWindowInitsize['x'])),int(new_size.height()*(self.buttonLoginInitPos['y']/self.mainWindowInitsize['y']))) 
        
-        #self.checkBox.move(int(new_size.width()*(self.checkBoxRememberMeInitPos['x']/self.mainWindowInitsize['x'])),int(new_size.height()*(self.checkBoxRememberMeInitPos['y']/self.mainWindowInitsize['y']))) 
         self.checkBox.move(int(new_size.width()/2-self.checkBoxRememberMeInitSize['x']),int(new_size.height()*(self.checkBoxRememberMeInitPos['y']/self.mainWindowInitsize['y']))) 
        
         self.world.move(int(new_size.width()/2-self.inputWorldInitSize['x']/2),int(new_size.height()*(self.inputWorldInitPos['y']/self.mainWindowInitsize['y']))) 
@@ -110,35 +109,66 @@ class myMainWindow(QMainWindow):
         TravLegendsWarLord.setStyleSheet("background-image: url(login.png);")
         self.centralwidget = QtWidgets.QWidget(TravLegendsWarLord)
         self.centralwidget.setObjectName("centralwidget")
-    
-        self.labelPassword = QtWidgets.QLabel(self.centralwidget)
-        #self.labelPassword.setGeometry(QtCore.QRect(230, 210, 251, 41))
+
+        #Elements Definition
+        ####################################################################################################  
+        ####################################################################################################  
+        
+        #email label
         self.labelEmail = QtWidgets.QLabel(self.centralwidget)
-        #self.labelEmail.setGeometry(QtCore.QRect(self.labelEmailInitSize['x'], self.labelEmailInitSize['y'], 251, 41))
+        #email input
+        self.inputEmail = QtWidgets.QPlainTextEdit(self.centralwidget)
+        
+        #password label
+        self.labelPassword = QtWidgets.QLabel(self.centralwidget)
+        #password input
+        self.inputPassword = QtWidgets.QLineEdit(self.centralwidget)
+        
+        #login button
+        self.buttonlogin = QtWidgets.QPushButton(self.centralwidget)
+        
+        #login remember me checkbox
+        self.checkBox = QtWidgets.QCheckBox(self.centralwidget)
 
+        #world input
+        self.world = QtWidgets.QPlainTextEdit(self.centralwidget)
+         
+        #Elements innitial positioning 
+        ####################################################################################################  
+        #################################################################################################### 
+        
+        
+        #Elements innitial geometry setup 
+        ####################################################################################################  
+        ####################################################################################################  
 
+        #email label 
+        #self.labelEmail.setGeometry(QtCore.QRect(self.buttonLoginInitPos['x'],self.buttonLoginInitPos['y'], self.buttonLoginInitSize['x'], self.buttonLoginInitSize['y']))
+        #email input
+        self.inputEmail.setGeometry(QtCore.QRect(self.inputEmailInitPos['x'], self.inputEmailInitPos['y'], 191, 31))
+        
+        #password label
+        #self.labelEmail.setGeometry(QtCore.QRect(self.labelEmailInitPos['x'],self.labelEmailInitPos['y'], self.labelEmailInitSize['x'], self.labelEmailInitSize['y']))
 
-
-        self.inputemail = QtWidgets.QPlainTextEdit(self.centralwidget)
-        self.inputemail.setGeometry(QtCore.QRect(self.inputEmailInitPos['y'], self.inputEmailInitPos['x'], 191, 31))
-
+        #password input
+        self.inputPassword.setGeometry(QtCore.QRect(230, 260, 191, 31))
 
        
-        self.inputemail.setSizeIncrement(QtCore.QSize(10, 10))
-        self.inputemail.setLineWidth(2)
-        self.inputemail.setObjectName("inputemail")
-        self.inputpassword = QtWidgets.QLineEdit(self.centralwidget)
-        self.inputpassword.setGeometry(QtCore.QRect(230, 260, 191, 31))
-        self.inputpassword.setEchoMode(QtWidgets.QLineEdit.Password)
-        self.inputpassword.setObjectName("inputpassword")
+        self.inputEmail.setSizeIncrement(QtCore.QSize(10, 10))
+        self.inputEmail.setLineWidth(2)
+        self.inputEmail.setObjectName("inputemail")
         
-        self.buttonlogin = QtWidgets.QPushButton(self.centralwidget)
-        self.buttonlogin.setGeometry(QtCore.QRect(self.buttonLoginInitPos['x'],self.buttonLoginInitPos['y'], self.buttonLoginInitSize['x'], self.buttonLoginInitSize['y']))
+        
+        self.inputPassword.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.inputPassword.setObjectName("inputpassword")
+        
+        
+        #self.buttonlogin.setGeometry(QtCore.QRect(self.buttonLoginInitPos['x'],self.buttonLoginInitPos['y'], self.buttonLoginInitSize['x'], self.buttonLoginInitSize['y']))
         self.buttonlogin.setObjectName("buttonlogin")
-        self.checkBox = QtWidgets.QCheckBox(self.centralwidget)
-        self.checkBox.setGeometry(QtCore.QRect(250, 320, 91, 17))
+        
+        #self.checkBox.setGeometry(QtCore.QRect(250, 320, 91, 17))
         self.checkBox.setObjectName("checkBox")
-        self.world = QtWidgets.QPlainTextEdit(self.centralwidget)
+        
         self.world.setGeometry(QtCore.QRect(120, 370, 491, 31))
         self.world.setObjectName("world")
         TravLegendsWarLord.setCentralWidget(self.centralwidget)
@@ -154,7 +184,11 @@ class myMainWindow(QMainWindow):
         self.menubar.addAction(self.menufile.menuAction())
         self.labelEmail=self.labelstyleup(self.labelEmail,"labelEmail")
         self.labelPassword=self.labelstyleup(self.labelPassword,"labelPassword")
-
+        self.inputPassword.setStyleSheet("color: rgb(255, 255, 255);")
+        self.inputEmail.setStyleSheet("color: rgb(255, 255, 255);")
+        self.buttonlogin.setStyleSheet("color: rgb(255, 255, 255);")
+        self.checkBox.setStyleSheet("color: rgb(255, 255, 255);")
+        self.labelWorld
         self.retranslateUi(TravLegendsWarLord)
         QtCore.QMetaObject.connectSlotsByName(TravLegendsWarLord)
 

@@ -2,3 +2,4 @@ TravWarLordvenv
 designer.exe
 designer.ink
 __pycache__
+*.un~
