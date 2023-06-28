@@ -75,15 +75,12 @@ class myMainWindow(QMainWindow):
         self.setupUi(self)
 
     def resizeEvent(self, event):
+        pass        
         # Get the new size of the window
         new_size = event.size()
      
-        # Calculate the new position for the button
-        # Set the new position for the button
-        #self.inputEmail.move(new_size.width() - self.inputEmail.width() - 230,new_size.height() - self.inputEmail.height() -170 )
    
         self.inputEmail.move(int(new_size.width()/2-self.inputEmailInitSize['x']/2),int(new_size.height()*(self.inputEmailInitPos['y']/self.mainWindowInitsize['y'])))        
-        #self.labelEmail.move(new_size.width() - self.labelEmail.width() - self.labelEmailInitWidth,new_size.height() - self.inputEmail.height() -self.labelEmailInitHeight )
         self.labelEmail.move(int(new_size.width()/2-self.labelEmailInitSize['x']/2),int(new_size.height()*(self.labelEmailInitPos['y']/self.mainWindowInitsize['y']))) 
        
         self.inputPassword.move(int(new_size.width()/2-self.inputPasswordInitSize['x']/2),int(new_size.height()*(self.inputPasswordInitPos['y']/self.mainWindowInitsize['y']))) 
@@ -96,8 +93,6 @@ class myMainWindow(QMainWindow):
        
         self.world.move(int(new_size.width()/2-self.inputWorldInitSize['x']/2),int(new_size.height()*(self.inputWorldInitPos['y']/self.mainWindowInitsize['y']))) 
        
-        #print(self.labelEmailInitPos.ge)
-        #self.button.move(new_x, new_y)
     
         pass
     def setupUi(self, TravLegendsWarLord):
