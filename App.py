@@ -13,18 +13,22 @@ import threading
 
 class AppController:
 
-    def __init__(self,ui,mainWindow):    
-        self.ui=ui
+    def __init__(self,mainWindow):   
+        self.isLoggedIn=False
+        #self.ui=ui
         #ui.setupUi(mainWindow)
-        ui.buttonlogin.clicked.connect(lambda: self.loginclicked(ui))
-        self.ui.labelEmail.setStyleSheet("color: rgb(255, 255, 255);")
-        self.ui.labelPassword.setStyleSheet("color: rgb(255, 255, 255);")
-    def logindriver(mail, password,world):
+        self.maindWindow = mainWindow
+        mainWindow.buttonlogin.clicked.connect(lambda: self.loginclicked(mainWindow))
+        #self.ui.labelEmail.setStyleSheet("color: rgb(255, 255, 255);")
+        #self.ui.labelPassword.setStyleSheet("color: rgb(255, 255, 255);")
+    def thread__logindriver(self,mail, password,world):
         driver = webdriver.Chrome()
         driver.get(world)
         emailxpath = "//input[@name='name']"  # Replace with your desired XPath
         passwordxpath = "//input[@name='password']"
         loginbuttonxpath= "//button[@type='submit']"
+        #TODO fix
+        # resources gonna go play cs  figure it out later
         wait = WebDriverWait(driver, 10)
         
         element = wait.until(EC.visibility_of_element_located((By.XPATH, emailxpath)))
@@ -33,19 +37,23 @@ class AppController:
         element.send_keys(password)
         element = wait.until(EC.visibility_of_element_located((By.XPATH, loginbuttonxpath)))
         element.click()
+        element = wait.until(EC.visibility_of_element_located((By.XPATH, loginbuttonxpath)))
+        return 
         sleep(20)
     def loginclicked(self,ui_MainWindow):
-        mail = ui_MainWindow.inputemail.toPlainText()
-        password = ui_MainWindow.inputpassword.text()
-        
+        mail = ui_MainWindow.inputEmail.toPlainText()
+        password = ui_MainWindow.inputPassword.text()
         world = ui_MainWindow.world.toPlainText()
         print(mail,password)
-        thread = threading.Thread(target=self.logindriver, args=(mail, password,world))
-        thread.start()
+        thread__login = threading.Thread(target=self.thread__logindriver, args=(mail, password,world))
+        self.isLoggedIn = thread__login.start()
+        thread__login.join()
+
+
     def connectMethodsToUI():
         pass
 
-class myMainWindow(QMainWindow):
+class loginWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         #MainWindow
@@ -103,7 +111,7 @@ class myMainWindow(QMainWindow):
         TravLegendsWarLord.resize(self.mainWindowInitsize['y'], self.mainWindowInitsize['x'])
         TravLegendsWarLord.setMinimumSize(QtCore.QSize(500, 500))
         TravLegendsWarLord.setWindowOpacity(100.0)
-        TravLegendsWarLord.setStyleSheet("background-image: url(login.png);")
+        TravLegendsWarLord.setStyleSheet("background-image: url(src/img/login.png);")
         self.centralwidget = QtWidgets.QWidget(TravLegendsWarLord)
         self.centralwidget.setObjectName("centralwidget")
 
@@ -174,7 +182,7 @@ class myMainWindow(QMainWindow):
         self.inputEmail.setStyleSheet("color: rgb(255, 255, 255);")
         self.buttonlogin.setStyleSheet("color: rgb(255, 255, 255);")
         self.checkBox.setStyleSheet("color: rgb(255, 255, 255);")
-        self.labelWorld
+        self.world.setStyleSheet("color: rgb(255, 255, 255);")
         self.retranslateUi(TravLegendsWarLord)
         QtCore.QMetaObject.connectSlotsByName(TravLegendsWarLord)
 
@@ -197,11 +205,26 @@ class myMainWindow(QMainWindow):
         widget.setObjectName(name)
         return widget
 
+class resourcesWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        pass
+
+    def setupUi(self,resourceswindow):
+        resourceswindow.setObjectName("TravLegendsWarLord")
+        resourceswindow.setEnabled(True)
+        resourceswindow.resize(self.mainWindowInitsize['y'], self.mainWindowInitsize['x'])
+        resourceswindow.setMinimumSize(QtCore.QSize(500, 500))
+        resourceswindow.setWindowOpacity(100.0)
+        resourceswindow.setStyleSheet("background-image: url(src/img/bgResources);")  
+        pass
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    mainWindow = myMainWindow()
+    mainWindow = loginWindow()
+    controller = AppController(mainWindow)
     mainWindow.show()
     
     sys.exit(app.exec_())
