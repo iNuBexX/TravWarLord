@@ -5,7 +5,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QPushButton,QMainWindow
+
 from time import sleep
+
 import threading 
 
 
@@ -108,7 +110,7 @@ class myMainWindow(QMainWindow):
         #Elements Definition
         ####################################################################################################  
         ####################################################################################################  
-        
+
         #email label
         self.labelEmail = QtWidgets.QLabel(self.centralwidget)
         #email input
@@ -137,31 +139,20 @@ class myMainWindow(QMainWindow):
         ####################################################################################################  
         ####################################################################################################  
 
-        #email label 
-        #self.labelEmail.setGeometry(QtCore.QRect(self.buttonLoginInitPos['x'],self.buttonLoginInitPos['y'], self.buttonLoginInitSize['x'], self.buttonLoginInitSize['y']))
         #email input
         self.inputEmail.setGeometry(QtCore.QRect(self.inputEmailInitPos['x'], self.inputEmailInitPos['y'], 191, 31))
         
-        #password label
-        #self.labelEmail.setGeometry(QtCore.QRect(self.labelEmailInitPos['x'],self.labelEmailInitPos['y'], self.labelEmailInitSize['x'], self.labelEmailInitSize['y']))
-
         #password input
         self.inputPassword.setGeometry(QtCore.QRect(230, 260, 191, 31))
-
-       
         self.inputEmail.setSizeIncrement(QtCore.QSize(10, 10))
         self.inputEmail.setLineWidth(2)
         self.inputEmail.setObjectName("inputemail")
-        
-        
         self.inputPassword.setEchoMode(QtWidgets.QLineEdit.Password)
         self.inputPassword.setObjectName("inputpassword")
         
         
-        #self.buttonlogin.setGeometry(QtCore.QRect(self.buttonLoginInitPos['x'],self.buttonLoginInitPos['y'], self.buttonLoginInitSize['x'], self.buttonLoginInitSize['y']))
         self.buttonlogin.setObjectName("buttonlogin")
         
-        #self.checkBox.setGeometry(QtCore.QRect(250, 320, 91, 17))
         self.checkBox.setObjectName("checkBox")
         
         self.world.setGeometry(QtCore.QRect(120, 370, 491, 31))
@@ -211,8 +202,6 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     mainWindow = myMainWindow()
-    #ui = trav.Ui_TravLegendsWarLord()
-    #controller = AppController(ui,mainWindow)
     mainWindow.show()
     
     sys.exit(app.exec_())
