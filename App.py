@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow,QWidget, QVBoxLayout, QLabel
+from PyQt5.QtWidgets import QMainWindow,QWidget, QGridLayout, QLabel,QPushButton
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from time import sleep
@@ -16,10 +16,10 @@ class AppController:
 
     def __init__(self,mainWindow):   
         self.isLoggedIn=False
+        self.resourcesWindow = None
         #self.ui=ui
         #ui.setupUi(mainWindow)
         self.mainWindow = mainWindow
-        self.resourcesfield3 = loginWindow()
         mainWindow.buttonlogin.clicked.connect(lambda: self.loginclicked(mainWindow))
         self.loadLoginCreds()
         #self.ui.labelEmail.setStyleSheet("color: rgb(255, 255, 255);")
@@ -48,12 +48,14 @@ class AppController:
         string += element.get_attribute("class")
         print(string)
         if string.find("resourceField3")!= -1:
-            self.isLoggedIn=True
+            self.isLoggedIn = True
+            
+            
+        #return 
+        #sleep(20)
 
-
-
-        return 
-        sleep(20)
+    
+    
     def loginclicked(self,ui_MainWindow):
         mail = ui_MainWindow.inputEmail.toPlainText()
         password = ui_MainWindow.inputPassword.text()
@@ -63,40 +65,50 @@ class AppController:
         #self.isLoggedIn = 
         thread__login.start()
         thread__login.join()
-        if self.isLoggedIn:
-            new_widget = QWidget()
-            layout = QVBoxLayout()
-            label = QLabel()
-            pixmap = QPixmap("src/img/bgResources")
-            scaled_pixmap = pixmap.scaled(self.mainWindow.size(), aspectRatioMode=Qt.KeepAspectRatioByExpanding)
-            label.setPixmap(scaled_pixmap)
-            label.setAlignment(Qt.AlignCenter)
-            
-
-            layout.addWidget(label)
-            centralWidget = self.mainWindow.centralWidget()
-
-            # Replace the existing layout with the new layout
-            
-
-            #self.mainWindow.setLayout(layout)
-            # Create new content (e.g., different widgets) for the new widget
-            #self.mainWindow.setStyleSheet("background-image: url(src/img/bgResources);background-size: cover;")  
-            #new_label = QLabel("New Content")
-            #new_layout.addWidget(new_label)
-            #self.mainWindow.setCentralWidget(new_widget)
-            centralWidget.setLayout(layout)
+        if(self.isLoggedIn == True):
+            self.resourcesWindow = resourcesWindow(self.mainWindow)
+        
     #TODO change into an .env file and add it to git ignore
     def loadLoginCreds(self):
         self.mainWindow.inputEmail.setPlainText("kelkor664455@gmail.com")
         self.mainWindow.inputPassword.setText("123456789")
-        self.mainWindow.world.setPlainText("https://nordics.x3.nordics.travian.com/")
+        self.mainWindow.world.setPlainText("https://ts8.x1.arabics.travian.com/")
 
 
     def connectMethodsToUI():
         pass
 
-class loginWindow(QMainWindow):
+class resourcesWindow:
+    def __init__(self,maindWindow):
+        self.mainWindow = maindWindow
+        self.setupUi()
+        #define elements positions  and sizes  here
+        pass
+    def setupUi(self):
+        self.mainWindow.setStyleSheet("QMainWindow { padding 0px;background-color:  rgb(65, 99, 46); }")
+        resourcesLayout = QGridLayout()
+        label = QLabel()
+        pixmap = QPixmap("src/img/bgResources")
+        scaled_pixmap = pixmap.scaled(self.mainWindow.size(), aspectRatioMode=Qt.KeepAspectRatioByExpanding)
+        label.setPixmap(scaled_pixmap)
+        label.setAlignment(Qt.AlignCenter)
+        button1 = QPushButton('Button 1')
+        button2 = QPushButton('Button 2')
+        button3 = QPushButton('Button 3')
+
+        # Add the buttons to the grid layout
+         # button1 at row 0, column 0
+        #resourcesLayout.addWidget(button2, 0, 1)  # button2 at row 0, column 1
+        #resourcesLayout.addWidget(button3, 1, 0, 1, 2)  # button3 spans 1 row and 2 columns, starting at row 1, column 0
+
+        resourcesLayout.addWidget(label,0, 0)
+        resourcesLayout.addWidget(button1, 0, 0,1,1)
+        self.mainWindow.centralWidget().setLayout(resourcesLayout)
+
+
+        pass
+
+class mainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         #MainWindow
@@ -128,7 +140,7 @@ class loginWindow(QMainWindow):
         self.setupUi(self)
 
     def resizeEvent(self, event):
-        pass        
+       
         # Get the new size of the window
         new_size = event.size()
 
@@ -155,9 +167,7 @@ class loginWindow(QMainWindow):
         resizedworld = self.findChild(QtWidgets.QPlainTextEdit, "world")
         if resizedworld:
             self.world.move(int(new_size.width()/2-self.inputWorldInitSize['x']/2),int(new_size.height()*(self.inputWorldInitPos['y']/self.mainWindowInitsize['y']))) 
-        
     
-        pass
     def setupUi(self, TravLegendsWarLord):
         TravLegendsWarLord.setObjectName("TravLegendsWarLord")
         TravLegendsWarLord.setEnabled(True)
@@ -264,6 +274,7 @@ class loginWindow(QMainWindow):
         self.buttonlogin.setText(_translate("TravLegendsWarLord", "login"))
         self.checkBox.setText(_translate("TravLegendsWarLord", "remember me"))
         self.menufile.setTitle(_translate("TravLegendsWarLord", "file"))
+    
     def labelstyleup(self,widget,name):
         widget = QtWidgets.QLabel(self.centralwidget)
         font = QtGui.QFont()
@@ -275,25 +286,10 @@ class loginWindow(QMainWindow):
         widget.setObjectName(name)
         return widget
 
-class resourcesWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-        pass
-
-    def setupUi(self,resourceswindow):
-        resourceswindow.setObjectName("TravLegendsWarLord")
-        resourceswindow.setEnabled(True)
-        resourceswindow.resize(self.mainWindowInitsize['y'], self.mainWindowInitsize['x'])
-        resourceswindow.setMinimumSize(QtCore.QSize(500, 500))
-        resourceswindow.setWindowOpacity(100.0)
-        resourceswindow.setStyleSheet("background-image: url(src/img/bgResources);")  
-        pass
-
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    mainWindow = loginWindow()
+    mainWindow = mainWindow()
     controller = AppController(mainWindow)
     mainWindow.show()
     
