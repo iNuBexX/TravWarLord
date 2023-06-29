@@ -4,8 +4,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QPushButton,QMainWindow
-
+from PyQt5.QtWidgets import QMainWindow,QWidget, QVBoxLayout, QLabel
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 from time import sleep
 
 import threading 
@@ -17,18 +18,23 @@ class AppController:
         self.isLoggedIn=False
         #self.ui=ui
         #ui.setupUi(mainWindow)
-        self.maindWindow = mainWindow
+        self.mainWindow = mainWindow
+        self.resourcesfield3 = loginWindow()
         mainWindow.buttonlogin.clicked.connect(lambda: self.loginclicked(mainWindow))
+        self.loadLoginCreds()
         #self.ui.labelEmail.setStyleSheet("color: rgb(255, 255, 255);")
         #self.ui.labelPassword.setStyleSheet("color: rgb(255, 255, 255);")
     def thread__logindriver(self,mail, password,world):
+        print("login thread")
         driver = webdriver.Chrome()
         driver.get(world)
         emailxpath = "//input[@name='name']"  # Replace with your desired XPath
         passwordxpath = "//input[@name='password']"
         loginbuttonxpath= "//button[@type='submit']"
+        resourcesFieldType = "//div[@id='resourceFieldContainer']"
         #TODO fix
         # resources gonna go play cs  figure it out later
+        
         wait = WebDriverWait(driver, 10)
         
         element = wait.until(EC.visibility_of_element_located((By.XPATH, emailxpath)))
@@ -37,7 +43,15 @@ class AppController:
         element.send_keys(password)
         element = wait.until(EC.visibility_of_element_located((By.XPATH, loginbuttonxpath)))
         element.click()
-        element = wait.until(EC.visibility_of_element_located((By.XPATH, loginbuttonxpath)))
+        element = wait.until(EC.visibility_of_element_located((By.XPATH, resourcesFieldType)))
+        string = ""
+        string += element.get_attribute("class")
+        print(string)
+        if string.find("resourceField3")!= -1:
+            self.isLoggedIn=True
+
+
+
         return 
         sleep(20)
     def loginclicked(self,ui_MainWindow):
@@ -46,8 +60,37 @@ class AppController:
         world = ui_MainWindow.world.toPlainText()
         print(mail,password)
         thread__login = threading.Thread(target=self.thread__logindriver, args=(mail, password,world))
-        self.isLoggedIn = thread__login.start()
+        #self.isLoggedIn = 
+        thread__login.start()
         thread__login.join()
+        if self.isLoggedIn:
+            new_widget = QWidget()
+            layout = QVBoxLayout()
+            label = QLabel()
+            pixmap = QPixmap("src/img/bgResources")
+            scaled_pixmap = pixmap.scaled(self.mainWindow.size(), aspectRatioMode=Qt.KeepAspectRatioByExpanding)
+            label.setPixmap(scaled_pixmap)
+            label.setAlignment(Qt.AlignCenter)
+            
+
+            layout.addWidget(label)
+            centralWidget = self.mainWindow.centralWidget()
+
+            # Replace the existing layout with the new layout
+            
+
+            #self.mainWindow.setLayout(layout)
+            # Create new content (e.g., different widgets) for the new widget
+            #self.mainWindow.setStyleSheet("background-image: url(src/img/bgResources);background-size: cover;")  
+            #new_label = QLabel("New Content")
+            #new_layout.addWidget(new_label)
+            #self.mainWindow.setCentralWidget(new_widget)
+            centralWidget.setLayout(layout)
+    #TODO change into an .env file and add it to git ignore
+    def loadLoginCreds(self):
+        self.mainWindow.inputEmail.setPlainText("kelkor664455@gmail.com")
+        self.mainWindow.inputPassword.setText("123456789")
+        self.mainWindow.world.setPlainText("https://nordics.x3.nordics.travian.com/")
 
 
     def connectMethodsToUI():
@@ -88,21 +131,31 @@ class loginWindow(QMainWindow):
         pass        
         # Get the new size of the window
         new_size = event.size()
-     
-   
-        self.inputEmail.move(int(new_size.width()/2-self.inputEmailInitSize['x']/2),int(new_size.height()*(self.inputEmailInitPos['y']/self.mainWindowInitsize['y'])))        
-        self.labelEmail.move(int(new_size.width()/2-self.labelEmailInitSize['x']/2),int(new_size.height()*(self.labelEmailInitPos['y']/self.mainWindowInitsize['y']))) 
-       
-        self.inputPassword.move(int(new_size.width()/2-self.inputPasswordInitSize['x']/2),int(new_size.height()*(self.inputPasswordInitPos['y']/self.mainWindowInitsize['y']))) 
-       
-        self.labelPassword.move(int(new_size.width()/2-self.labelPasswordInitSize['x']/2),int(new_size.height()*(self.labelPasswordInitPos['y']/self.mainWindowInitsize['y']))) 
-       
-        self.buttonlogin.move(int(new_size.width()*(self.buttonLoginInitPos['x']/self.mainWindowInitsize['x'])),int(new_size.height()*(self.buttonLoginInitPos['y']/self.mainWindowInitsize['y']))) 
-       
-        self.checkBox.move(int(new_size.width()/2-self.checkBoxRememberMeInitSize['x']),int(new_size.height()*(self.checkBoxRememberMeInitPos['y']/self.mainWindowInitsize['y']))) 
-       
-        self.world.move(int(new_size.width()/2-self.inputWorldInitSize['x']/2),int(new_size.height()*(self.inputWorldInitPos['y']/self.mainWindowInitsize['y']))) 
-       
+
+        #log in widget
+        #################################################################################################### 
+        resizedinputmail = self.findChild(QtWidgets.QPlainTextEdit, "inputemail")
+        if resizedinputmail :
+            self.inputEmail.move(int(new_size.width()/2-self.inputEmailInitSize['x']/2),int(new_size.height()*(self.inputEmailInitPos['y']/self.mainWindowInitsize['y'])))        
+        resizedlabelEmail = self.findChild(QLabel, "labelemail")
+        if  resizedlabelEmail:
+            self.labelEmail.move(int(new_size.width()/2-self.labelEmailInitSize['x']/2),int(new_size.height()*(self.labelEmailInitPos['y']/self.mainWindowInitsize['y']))) 
+        resizedinputPassword = self.findChild(QtWidgets.QLineEdit, "inputpassword")
+        if resizedinputPassword:
+            self.inputPassword.move(int(new_size.width()/2-self.inputPasswordInitSize['x']/2),int(new_size.height()*(self.inputPasswordInitPos['y']/self.mainWindowInitsize['y']))) 
+        resizedlabelPassword = self.findChild(QLabel, "labelpassword")
+        if resizedlabelPassword:
+            self.labelPassword.move(int(new_size.width()/2-self.labelPasswordInitSize['x']/2),int(new_size.height()*(self.labelPasswordInitPos['y']/self.mainWindowInitsize['y']))) 
+        resizedbuttonlogin = self.findChild(QtWidgets.QPushButton, "buttonlogin")
+        if resizedbuttonlogin:
+            self.buttonlogin.move(int(new_size.width()*(self.buttonLoginInitPos['x']/self.mainWindowInitsize['x'])),int(new_size.height()*(self.buttonLoginInitPos['y']/self.mainWindowInitsize['y']))) 
+        resizedcheckBox = self.findChild(QtWidgets.QCheckBox, "checkBox")
+        if resizedcheckBox:
+            self.checkBox.move(int(new_size.width()/2-self.checkBoxRememberMeInitSize['x']),int(new_size.height()*(self.checkBoxRememberMeInitPos['y']/self.mainWindowInitsize['y']))) 
+        resizedworld = self.findChild(QtWidgets.QPlainTextEdit, "world")
+        if resizedworld:
+            self.world.move(int(new_size.width()/2-self.inputWorldInitSize['x']/2),int(new_size.height()*(self.inputWorldInitPos['y']/self.mainWindowInitsize['y']))) 
+        
     
         pass
     def setupUi(self, TravLegendsWarLord):
@@ -115,9 +168,11 @@ class loginWindow(QMainWindow):
         self.centralwidget = QtWidgets.QWidget(TravLegendsWarLord)
         self.centralwidget.setObjectName("centralwidget")
 
-        #Elements Definition
+
+        #Login widget elements definition
         ####################################################################################################  
-        ####################################################################################################  
+        #################################################################################################### 
+     
 
         #email label
         self.labelEmail = QtWidgets.QLabel(self.centralwidget)
@@ -137,7 +192,26 @@ class loginWindow(QMainWindow):
 
         #world input
         self.world = QtWidgets.QPlainTextEdit(self.centralwidget)
-         
+
+        #menubar 
+        self.menubar = QtWidgets.QMenuBar(TravLegendsWarLord)
+
+        #statusbar
+        self.statusbar = QtWidgets.QStatusBar(TravLegendsWarLord)
+
+        #Elements innitial naming setup 
+        ####################################################################################################  
+        ####################################################################################################  
+        self.inputEmail.setObjectName("inputemail")
+        self.inputPassword.setObjectName("inputpassword")
+        self.labelEmail.setObjectName("labelemail")
+        self.labelPassword.setObjectName("labelpassword")
+        self.buttonlogin.setObjectName("buttonlogin")
+        self.checkBox.setObjectName("checkBox")
+        self.world.setObjectName("world")
+        self.menubar.setObjectName("menubar")
+        self.statusbar.setObjectName("statusbar")
+
         #Elements innitial positioning 
         ####################################################################################################  
         #################################################################################################### 
@@ -154,26 +228,22 @@ class loginWindow(QMainWindow):
         self.inputPassword.setGeometry(QtCore.QRect(230, 260, 191, 31))
         self.inputEmail.setSizeIncrement(QtCore.QSize(10, 10))
         self.inputEmail.setLineWidth(2)
-        self.inputEmail.setObjectName("inputemail")
+
         self.inputPassword.setEchoMode(QtWidgets.QLineEdit.Password)
-        self.inputPassword.setObjectName("inputpassword")
-        
-        
-        self.buttonlogin.setObjectName("buttonlogin")
-        
-        self.checkBox.setObjectName("checkBox")
-        
+
+
+
         self.world.setGeometry(QtCore.QRect(120, 370, 491, 31))
-        self.world.setObjectName("world")
+        
         TravLegendsWarLord.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(TravLegendsWarLord)
+        
         self.menubar.setGeometry(QtCore.QRect(0, 0, 816, 21))
-        self.menubar.setObjectName("menubar")
+        
         self.menufile = QtWidgets.QMenu(self.menubar)
         self.menufile.setObjectName("menufile")
         TravLegendsWarLord.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(TravLegendsWarLord)
-        self.statusbar.setObjectName("statusbar")
+        
+        
         TravLegendsWarLord.setStatusBar(self.statusbar)
         self.menubar.addAction(self.menufile.menuAction())
         self.labelEmail=self.labelstyleup(self.labelEmail,"labelEmail")
