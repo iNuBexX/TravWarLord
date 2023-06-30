@@ -1,73 +1,148 @@
-import travlord as trav
+import resourceswindow as Rwindow
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow,QWidget, QGridLayout, QLabel,QPushButton
+from PyQt5.QtWidgets import QMainWindow,QWidget, QGridLayout, QLabel,QPushButton,QSpacerItem
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from time import sleep
 
 import threading 
 
+from PyQt5.QtCore import QObject, pyqtSignal
+
+class ResourcesDataObject(QObject):
+    
+    lumber_signal = pyqtSignal(str)
+    clay_signal = pyqtSignal(str)
+    iron_signal = pyqtSignal(str)
+    crops_signal = pyqtSignal(str)
+    def __init__(self):
+        super().__init__()
+        self._lumber = ""
+        self._clay= ""
+        self._iron= ""
+        self._crops= ""
+
+    @property
+    def lumber(self):
+        return self._lumber
+    @property
+    def iron(self):
+        return self._iron
+    @property
+    def crops(self):
+        return self._crops
+    @property
+    def clay(self):
+        return self._clay
+    
+    @lumber.setter
+    def lumber(self, value):
+        self._lumber = value
+        self.lumber_signal.emit(value)
+    @clay.setter
+    def clay(self, value):
+        self._clay = value
+        self.clay_signal.emit(value)
+    @iron.setter
+    def iron(self, value):
+        self._iron = value
+        self.iron_signal.emit(value)
+    @crops.setter
+    def crops(self, value):
+        self._crops = value
+        self.crops_signal.emit(value)
 
 class AppController:
 
     def __init__(self,mainWindow):   
+        #TODO this feels like it doesn't belong here 
+        self.lumberStrogeLocator ="//div[@id='l1']"
+        self.clayStorageLocator ="//div[@id='l2']"
+        self.ironStorageLocator ="//div[@id='l3']"
+        self.cropsStorageLocator ="//div[@id='l4']"
         self.isLoggedIn=False
+        self.driver = None
+        self.wait = None
         self.resourcesWindow = None
         #self.ui=ui
         #ui.setupUi(mainWindow)
         self.mainWindow = mainWindow
         mainWindow.buttonlogin.clicked.connect(lambda: self.loginclicked(mainWindow))
         self.loadLoginCreds()
+        self.resources_data_object = ResourcesDataObject()
+        
         #self.ui.labelEmail.setStyleSheet("color: rgb(255, 255, 255);")
         #self.ui.labelPassword.setStyleSheet("color: rgb(255, 255, 255);")
-    def thread__logindriver(self,mail, password,world):
+    def thread__loginDriver(self,mail, password,world):
         print("login thread")
-        driver = webdriver.Chrome()
-        driver.get(world)
+        self.driver = webdriver.Chrome()
+        self.wait = WebDriverWait(self.driver, 10)
+        self.driver.get(world)
         emailxpath = "//input[@name='name']"  # Replace with your desired XPath
         passwordxpath = "//input[@name='password']"
         loginbuttonxpath= "//button[@type='submit']"
         resourcesFieldType = "//div[@id='resourceFieldContainer']"
+        
         #TODO fix
         # resources gonna go play cs  figure it out later
         
-        wait = WebDriverWait(driver, 10)
         
-        element = wait.until(EC.visibility_of_element_located((By.XPATH, emailxpath)))
+        
+        element = self.wait.until(EC.visibility_of_element_located((By.XPATH, emailxpath)))
         element.send_keys(mail)
-        element = wait.until(EC.visibility_of_element_located((By.XPATH, passwordxpath)))
+        element = self.wait.until(EC.visibility_of_element_located((By.XPATH, passwordxpath)))
         element.send_keys(password)
-        element = wait.until(EC.visibility_of_element_located((By.XPATH, loginbuttonxpath)))
+        element = self.wait.until(EC.visibility_of_element_located((By.XPATH, loginbuttonxpath)))
         element.click()
-        element = wait.until(EC.visibility_of_element_located((By.XPATH, resourcesFieldType)))
+        element = self.wait.until(EC.visibility_of_element_located((By.XPATH, resourcesFieldType)))
         string = ""
         string += element.get_attribute("class")
         print(string)
         if string.find("resourceField3")!= -1:
             self.isLoggedIn = True
             
-            
-        #return 
-        #sleep(20)
 
-    
-    
+    def thread__getResourcesDriver(self):
+        while(self.isLoggedIn): 
+            self.resources_data_object.lumber = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.lumberStrogeLocator))).text
+            self.resources_data_object.clay = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.clayStorageLocator))).text
+            self.resources_data_object.iron = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.ironStorageLocator))).text
+            self.resources_data_object.crops = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.cropsStorageLocator))).text
+            sleep(3)
+            #TODO set self data signal thingies here
+    def GUI_updateLumber(self,amount):
+        self.resourcesWindow.label_10.setText(amount)
+    def GUI_updateClay(self,amount):
+        self.resourcesWindow.label_11.setText(amount)
+    def GUI_updateCrops(self,amount):
+        self.resourcesWindow.label_12.setText(amount)
+    def GUI_updateIron(self,amount):
+        self.resourcesWindow.label_13.setText(amount)
+
     def loginclicked(self,ui_MainWindow):
         mail = ui_MainWindow.inputEmail.toPlainText()
         password = ui_MainWindow.inputPassword.text()
         world = ui_MainWindow.world.toPlainText()
         print(mail,password)
-        thread__login = threading.Thread(target=self.thread__logindriver, args=(mail, password,world))
+        thread__login = threading.Thread(target=self.thread__loginDriver, args=(mail, password,world))
         #self.isLoggedIn = 
         thread__login.start()
         thread__login.join()
         if(self.isLoggedIn == True):
-            self.resourcesWindow = resourcesWindow(self.mainWindow)
-        
+            self.resourcesWindow = Rwindow.Ui_MainWindow()
+            self.resourcesWindow .setupUi(self.mainWindow)
+            self.resources_data_object.lumber_signal.connect(self.GUI_updateLumber)
+            self.resources_data_object.clay_signal.connect(self.GUI_updateClay)
+            self.resources_data_object.iron_signal.connect(self.GUI_updateIron)
+            self.resources_data_object.crops_signal.connect(self.GUI_updateCrops)
+            thread__getResources = threading.Thread(target=self.thread__getResourcesDriver)
+            thread__getResources.start()
+
+
     #TODO change into an .env file and add it to git ignore
     def loadLoginCreds(self):
         self.mainWindow.inputEmail.setPlainText("kelkor664455@gmail.com")
@@ -78,41 +153,47 @@ class AppController:
     def connectMethodsToUI():
         pass
 
-class resourcesWindow:
-    def __init__(self,maindWindow):
-        self.mainWindow = maindWindow
-        self.setupUi()
+#class resourcesWindow:
+  #  def __init__(self,maindWindow):
+  #      self.mainWindow = maindWindow
+  #      self.setupUi()
         #define elements positions  and sizes  here
-        pass
-    def setupUi(self):
-        self.mainWindow.setStyleSheet("QMainWindow { padding 0px;background-color:  rgb(65, 99, 46); }")
-        resourcesLayout = QGridLayout()
-        label = QLabel()
-        pixmap = QPixmap("src/img/bgResources")
-        scaled_pixmap = pixmap.scaled(self.mainWindow.size(), aspectRatioMode=Qt.KeepAspectRatioByExpanding)
-        label.setPixmap(scaled_pixmap)
-        label.setAlignment(Qt.AlignCenter)
-        button1 = QPushButton('Button 1')
-        button2 = QPushButton('Button 2')
-        button3 = QPushButton('Button 3')
+   #     pass
+   # def setupUi(self):
+      #  self.mainWindow.setStyleSheet("QMainWindow { padding 0px;background-color:  rgb(65, 99, 46); }")
+      #  resourcesLayout = QGridLayout()
+      #  label = QLabel()
+      #  pixmap = QPixmap("src/img/bgResources")
+      #  scaled_pixmap = pixmap.scaled(self.mainWindow.size(), aspectRatioMode=Qt.KeepAspectRatioByExpanding)
+      #  label.setPixmap(scaled_pixmap)
+      #  label.setAlignment(Qt.AlignCenter)
+      #  button1 = QPushButton('Button 1')
+     #   button2 = QPushButton('Button 2')
+      #  button3 = QPushButton('Button 3')
 
         # Add the buttons to the grid layout
          # button1 at row 0, column 0
         #resourcesLayout.addWidget(button2, 0, 1)  # button2 at row 0, column 1
         #resourcesLayout.addWidget(button3, 1, 0, 1, 2)  # button3 spans 1 row and 2 columns, starting at row 1, column 0
+       
 
-        resourcesLayout.addWidget(label,0, 0)
-        resourcesLayout.addWidget(button1, 0, 0,1,1)
-        self.mainWindow.centralWidget().setLayout(resourcesLayout)
+    #    resourcesLayout.addWidget(label,0, 0)
+        #resourcesLayout.addWidget(button1, 0, 0,0.005,0.05)
+      #  spacer = QSpacerItem(20, 20)  # Create a spacer item with a fixed size
+  #      resourcesLayout.addItem(spacer, 0, 0)  # Add the spacer to a specific cell
+   #     self.mainWindow.centralWidget().setLayout(resourcesLayout)
 
 
-        pass
+ #       pass
 
 class mainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        
         #MainWindow
         self.mainWindowInitsize = {'x':800,'y':800}
+        
+        #this does not belong to the main winsow
         #Email label
         self.labelEmailInitPos = {'x':200,'y':200}
         self.labelEmailInitSize = {'x':251,'y':41}
@@ -285,6 +366,8 @@ class mainWindow(QMainWindow):
         widget.setFrameShadow(QtWidgets.QFrame.Raised)
         widget.setObjectName(name)
         return widget
+
+
 
 if __name__ == "__main__":
     import sys
