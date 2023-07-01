@@ -13,8 +13,7 @@ import threading
 
 from PyQt5.QtCore import QObject, pyqtSignal
 
-class ResourcesDataObject(QObject):
-    
+class ResourcesDataObject(QObject):   
     lumber_signal = pyqtSignal(str)
     clay_signal = pyqtSignal(str)
     iron_signal = pyqtSignal(str)
@@ -56,10 +55,47 @@ class ResourcesDataObject(QObject):
         self._crops = value
         self.crops_signal.emit(value)
 
+class FieldsDataObject(QObject):
+    field_signal1 = pyqtSignal(str,str)
+    field_signal2 = pyqtSignal(str,str)
+    field_signal3 = pyqtSignal(str,str)
+    field_signal4 = pyqtSignal(str,str)
+    field_signal5 = pyqtSignal(str,str)
+    field_signal6 = pyqtSignal(str,str)
+    field_signal7 = pyqtSignal(str,str)
+    field_signal8= pyqtSignal(str,str)
+    field_signal9 = pyqtSignal(str,str)
+    field_signal10 = pyqtSignal(str,str)
+    field_signal11 = pyqtSignal(str,str)
+    field_signal12 = pyqtSignal(str,str)
+    field_signal13 = pyqtSignal(str,str)
+    field_signal14 = pyqtSignal(str,str)
+    field_signal15 = pyqtSignal(str,str)
+    field_signal16 = pyqtSignal(str,str)
+    field_signal17 = pyqtSignal(str,str)
+    field_signal18 = pyqtSignal(str,str)
+
+    def __init__(self):
+        super().__init__()
+        for i in range(1,19):
+            setattr(self, f"_field{i}","")
+    @property
+    def field(self,i):
+        return getattr(self, f"_field{i}")
+
+    def setfield(self, value,i):
+        setattr(self, f"_field{i}",value) 
+        #self._field = value
+        getattr(self, f"field_signal{i}").emit(value,f"{i}")
+    
+    
+
 class AppController:
 
     def __init__(self,mainWindow):   
         #TODO this feels like it doesn't belong here 
+        self.resources_data_object = ResourcesDataObject()
+        self.fields_data_object = FieldsDataObject()
         self.lumberStrogeLocator ="//div[@id='l1']"
         self.clayStorageLocator ="//div[@id='l2']"
         self.ironStorageLocator ="//div[@id='l3']"
@@ -68,12 +104,11 @@ class AppController:
         self.driver = None
         self.wait = None
         self.resourcesWindow = None
-        #self.ui=ui
-        #ui.setupUi(mainWindow)
+
         self.mainWindow = mainWindow
         mainWindow.buttonlogin.clicked.connect(lambda: self.loginclicked(mainWindow))
         self.loadLoginCreds()
-        self.resources_data_object = ResourcesDataObject()
+        
         
         #self.ui.labelEmail.setStyleSheet("color: rgb(255, 255, 255);")
         #self.ui.labelPassword.setStyleSheet("color: rgb(255, 255, 255);")
@@ -114,6 +149,13 @@ class AppController:
             self.resources_data_object.crops = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.cropsStorageLocator))).text
             sleep(3)
             #TODO set self data signal thingies here
+    def thread_getFieldsDriver(self):
+        for i in range(1,19):
+            fieldlocator=f"//a[@href='/build.php?id={i}']"
+            self.fields_data_object.setfield(self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator))).text,i)
+
+            #self.resources_data_object = self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator))).text
+            #setattr(self.fields_data_object, f"field{i}",self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator))).text)
     def GUI_updateLumber(self,amount):
         self.resourcesWindow.label_10.setText(amount)
     def GUI_updateClay(self,amount):
@@ -122,7 +164,10 @@ class AppController:
         self.resourcesWindow.label_12.setText(amount)
     def GUI_updateIron(self,amount):
         self.resourcesWindow.label_13.setText(amount)
-
+    def GUI_updateField(self,level,i):
+        #setattr(self.resourcesWindow,f"fieldlabel{i}",amount)
+        getattr(self.resourcesWindow,f"fieldlabel{i}").setText(level)
+       # self.resourcesWindow.fieldlabel.setText(amount)
     def loginclicked(self,ui_MainWindow):
         mail = ui_MainWindow.inputEmail.toPlainText()
         password = ui_MainWindow.inputPassword.text()
@@ -139,8 +184,15 @@ class AppController:
             self.resources_data_object.clay_signal.connect(self.GUI_updateClay)
             self.resources_data_object.iron_signal.connect(self.GUI_updateIron)
             self.resources_data_object.crops_signal.connect(self.GUI_updateCrops)
+            for i in range(1,19):
+            #self.resources_data_object.iron_signal.connect(self.GUI_updateIron)
+                getattr(self.fields_data_object, f"field_signal{i}").connect(lambda level, fieldnumber: self.GUI_updateField(level,fieldnumber))
+            #self.fields_data_object.connectSignals(self)
+            
             thread__getResources = threading.Thread(target=self.thread__getResourcesDriver)
             thread__getResources.start()
+            thread_getFieldsDriver = threading.Thread(target=self.thread_getFieldsDriver)
+            thread_getFieldsDriver.start()
 
 
     #TODO change into an .env file and add it to git ignore
