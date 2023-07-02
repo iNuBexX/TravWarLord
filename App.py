@@ -75,6 +75,7 @@ class FieldsDataObject(QObject):
     field_signal17 = pyqtSignal(str,str)
     field_signal18 = pyqtSignal(str,str)
 
+  
     def __init__(self):
         super().__init__()
         for i in range(1,19):
@@ -94,17 +95,18 @@ class AppController:
 
     def __init__(self,mainWindow):   
         #TODO this feels like it doesn't belong here 
+        self.resourcesViewLocator = "//a[contains(@class,'village resourceView')]"
         self.resources_data_object = ResourcesDataObject()
         self.fields_data_object = FieldsDataObject()
         self.lumberStrogeLocator ="//div[@id='l1']"
         self.clayStorageLocator ="//div[@id='l2']"
         self.ironStorageLocator ="//div[@id='l3']"
         self.cropsStorageLocator ="//div[@id='l4']"
-        self.isLoggedIn=False
+        self.isLoggedIn= False
         self.driver = None
         self.wait = None
         self.resourcesWindow = None
-
+        self.currentTab = "resources"
         self.mainWindow = mainWindow
         mainWindow.buttonlogin.clicked.connect(lambda: self.loginclicked(mainWindow))
         self.loadLoginCreds()
@@ -139,15 +141,14 @@ class AppController:
         print(string)
         if string.find("resourceField3")!= -1:
             self.isLoggedIn = True
-            
-
     def thread__getResourcesDriver(self):
         while(self.isLoggedIn): 
-            self.resources_data_object.lumber = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.lumberStrogeLocator))).text
-            self.resources_data_object.clay = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.clayStorageLocator))).text
-            self.resources_data_object.iron = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.ironStorageLocator))).text
-            self.resources_data_object.crops = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.cropsStorageLocator))).text
-            sleep(3)
+            if(self.currentTab=="resources"):
+                self.resources_data_object.lumber = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.lumberStrogeLocator))).text
+                self.resources_data_object.clay = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.clayStorageLocator))).text
+                self.resources_data_object.iron = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.ironStorageLocator))).text
+                self.resources_data_object.crops = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.cropsStorageLocator))).text
+                sleep(3)
             #TODO set self data signal thingies here
     def thread_getFieldsDriver(self):
         for i in range(1,19):
@@ -180,21 +181,27 @@ class AppController:
         if(self.isLoggedIn == True):
             self.resourcesWindow = Rwindow.Ui_MainWindow()
             self.resourcesWindow .setupUi(self.mainWindow)
+            for i in range(1,19):
+                getattr(self.resourcesWindow,f"pushButton_fieldlabel{i}").clicked.connect(self.updateFieldDriver(i))
+            
             self.resources_data_object.lumber_signal.connect(self.GUI_updateLumber)
             self.resources_data_object.clay_signal.connect(self.GUI_updateClay)
             self.resources_data_object.iron_signal.connect(self.GUI_updateIron)
             self.resources_data_object.crops_signal.connect(self.GUI_updateCrops)
             for i in range(1,19):
-            #self.resources_data_object.iron_signal.connect(self.GUI_updateIron)
                 getattr(self.fields_data_object, f"field_signal{i}").connect(lambda level, fieldnumber: self.GUI_updateField(level,fieldnumber))
-            #self.fields_data_object.connectSignals(self)
             
             thread__getResources = threading.Thread(target=self.thread__getResourcesDriver)
             thread__getResources.start()
             thread_getFieldsDriver = threading.Thread(target=self.thread_getFieldsDriver)
             thread_getFieldsDriver.start()
 
-
+    def Navigate_Resources(self):
+        element = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.resourcesViewLocator)))
+        element.click()
+        
+        thread_getFieldsDriver = threading.Thread(target=self.thread_getFieldsDriver)
+        thread_getFieldsDriver.start()
     #TODO change into an .env file and add it to git ignore
     def loadLoginCreds(self):
         self.mainWindow.inputEmail.setPlainText("kelkor664455@gmail.com")
@@ -205,39 +212,23 @@ class AppController:
     def connectMethodsToUI():
         pass
 
-#class resourcesWindow:
-  #  def __init__(self,maindWindow):
-  #      self.mainWindow = maindWindow
-  #      self.setupUi()
-        #define elements positions  and sizes  here
-   #     pass
-   # def setupUi(self):
-      #  self.mainWindow.setStyleSheet("QMainWindow { padding 0px;background-color:  rgb(65, 99, 46); }")
-      #  resourcesLayout = QGridLayout()
-      #  label = QLabel()
-      #  pixmap = QPixmap("src/img/bgResources")
-      #  scaled_pixmap = pixmap.scaled(self.mainWindow.size(), aspectRatioMode=Qt.KeepAspectRatioByExpanding)
-      #  label.setPixmap(scaled_pixmap)
-      #  label.setAlignment(Qt.AlignCenter)
-      #  button1 = QPushButton('Button 1')
-     #   button2 = QPushButton('Button 2')
-      #  button3 = QPushButton('Button 3')
-
-        # Add the buttons to the grid layout
-         # button1 at row 0, column 0
-        #resourcesLayout.addWidget(button2, 0, 1)  # button2 at row 0, column 1
-        #resourcesLayout.addWidget(button3, 1, 0, 1, 2)  # button3 spans 1 row and 2 columns, starting at row 1, column 0
-       
-
-    #    resourcesLayout.addWidget(label,0, 0)
-        #resourcesLayout.addWidget(button1, 0, 0,0.005,0.05)
-      #  spacer = QSpacerItem(20, 20)  # Create a spacer item with a fixed size
-  #      resourcesLayout.addItem(spacer, 0, 0)  # Add the spacer to a specific cell
-   #     self.mainWindow.centralWidget().setLayout(resourcesLayout)
-
-
- #       pass
-
+    def updateFieldDriver(self,i):
+        def closure():   
+            print(i)
+            self.currentTab = "field"
+            fieldlocator=f"//a[@href='/build.php?id={i}']"
+            element = self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator)))
+            element.click()
+            buildbutton="//button[contains(@class,'green build')]"
+            try:
+                element = self.wait.until(EC.visibility_of_element_located((By.XPATH, buildbutton)))
+                element.click()
+            except:
+                self.Navigate_Resources()
+              
+            self.currentTab = "resources"
+        return closure
+    
 class mainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
