@@ -4,10 +4,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow,QWidget, QGridLayout, QLabel,QPushButton,QSpacerItem
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMainWindow, QLabel
 from time import sleep
+from datetime import datetime, timedelta
+import time
 
 import threading 
 
@@ -108,12 +108,16 @@ class AppController:
         self.resourcesWindow = None
         self.currentTab = "resources"
         self.mainWindow = mainWindow
+        self.thread__buildingList= None
         mainWindow.buttonlogin.clicked.connect(lambda: self.loginclicked(mainWindow))
         self.loadLoginCreds()
         
         
         #self.ui.labelEmail.setStyleSheet("color: rgb(255, 255, 255);")
         #self.ui.labelPassword.setStyleSheet("color: rgb(255, 255, 255);")
+    
+  
+    
     def thread__loginDriver(self,mail, password,world):
         print("login thread")
         self.driver = webdriver.Chrome()
@@ -157,6 +161,36 @@ class AppController:
 
             #self.resources_data_object = self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator))).text
             #setattr(self.fields_data_object, f"field{i}",self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator))).text)
+    def thread_getBuildingListDriver(self):
+        try:
+            timer ="//div[@class='buildingList']//ul//span[@class='timer']"
+            print(timer)
+            time_str = self.wait.until(EC.visibility_of_element_located((By.XPATH, timer))).text
+            print(time_str)
+            initial_time = datetime.strptime(time_str, "%H:%M:%S")
+            zero_time = datetime.strptime("0:00:00", "%H:%M:%S")
+            item = QtWidgets.QTableWidgetItem()
+            self.resourcesWindow.tableWidget.setItem(0, 1, item)
+            
+            while initial_time > zero_time:
+                
+                # Format and print the current time
+
+                
+                
+                # Decrement the time by 1 second
+                initial_time -= timedelta(seconds=1)
+
+                # Pause for 1 second before the next iteration
+                time.sleep(1)
+                self.resourcesWindow.tableWidget.item(0, 1).setText(initial_time.strftime("%H:%M:%S"))
+                self.resourcesWindow.tableWidget.viewport().update()
+                #print(initial_time.strftime("%H:%M:%S"))
+             
+        except:
+            print("no buildings")
+
+
     def GUI_updateLumber(self,amount):
         self.resourcesWindow.label_10.setText(amount)
     def GUI_updateClay(self,amount):
@@ -167,7 +201,8 @@ class AppController:
         self.resourcesWindow.label_13.setText(amount)
     def GUI_updateField(self,level,i):
         #setattr(self.resourcesWindow,f"fieldlabel{i}",amount)
-        getattr(self.resourcesWindow,f"fieldlabel{i}").setText(level)
+        getattr(self.resourcesWindow,f"fieldlabel{i}").setText(f"{level}")
+       
        # self.resourcesWindow.fieldlabel.setText(amount)
     def loginclicked(self,ui_MainWindow):
         mail = ui_MainWindow.inputEmail.toPlainText()
@@ -181,8 +216,9 @@ class AppController:
         if(self.isLoggedIn == True):
             self.resourcesWindow = Rwindow.Ui_MainWindow()
             self.resourcesWindow .setupUi(self.mainWindow)
+      
             for i in range(1,19):
-                getattr(self.resourcesWindow,f"pushButton_fieldlabel{i}").clicked.connect(self.updateFieldDriver(i))
+                getattr(self.resourcesWindow,f"pushButton_fieldlabel{i}").clicked.connect(self.updateFieldDriver(f"{i}"))
             
             self.resources_data_object.lumber_signal.connect(self.GUI_updateLumber)
             self.resources_data_object.clay_signal.connect(self.GUI_updateClay)
@@ -190,27 +226,33 @@ class AppController:
             self.resources_data_object.crops_signal.connect(self.GUI_updateCrops)
             for i in range(1,19):
                 getattr(self.fields_data_object, f"field_signal{i}").connect(lambda level, fieldnumber: self.GUI_updateField(level,fieldnumber))
+            #TODO use files for memory to load in queue
+
+            self.resourcesWindow.tableWidget.setRowCount(1)
             
             thread__getResources = threading.Thread(target=self.thread__getResourcesDriver)
             thread__getResources.start()
             thread_getFieldsDriver = threading.Thread(target=self.thread_getFieldsDriver)
             thread_getFieldsDriver.start()
+            if(self.thread__buildingList):
+               self.thread__buildingList._stop()
+            self.thread__buildingList = threading.Thread(target=self.thread_getBuildingListDriver)
+            self.thread__buildingList.start()
 
     def Navigate_Resources(self):
         element = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.resourcesViewLocator)))
         element.click()
-        
+        if(self.thread__buildingList):
+               self.thread__buildingList._stop()
+        thread_getBuildingList = threading.Thread(target=self.thread_getBuildingListDriver)
+        thread_getBuildingList.start()
         thread_getFieldsDriver = threading.Thread(target=self.thread_getFieldsDriver)
         thread_getFieldsDriver.start()
     #TODO change into an .env file and add it to git ignore
     def loadLoginCreds(self):
         self.mainWindow.inputEmail.setPlainText("kelkor664455@gmail.com")
         self.mainWindow.inputPassword.setText("123456789")
-        self.mainWindow.world.setPlainText("https://ts8.x1.arabics.travian.com/")
-
-
-    def connectMethodsToUI():
-        pass
+        self.mainWindow.world.setPlainText("https://ts2.x1.international.travian.com/")
 
     def updateFieldDriver(self,i):
         def closure():   
@@ -225,8 +267,8 @@ class AppController:
                 element.click()
             except:
                 self.Navigate_Resources()
-              
             self.currentTab = "resources"
+            
         return closure
     
 class mainWindow(QMainWindow):
