@@ -98,6 +98,7 @@ class AppController:
         self.resourcesViewLocator = "//a[contains(@class,'village resourceView')]"
         self.resources_data_object = ResourcesDataObject()
         self.fields_data_object = FieldsDataObject()
+        #TODO fix this (changes with world)
         self.lumberStrogeLocator ="//div[@id='l1']"
         self.clayStorageLocator ="//div[@id='l2']"
         self.ironStorageLocator ="//div[@id='l3']"
@@ -233,8 +234,8 @@ class AppController:
             
             thread__getResources = threading.Thread(target=self.thread__getResourcesDriver)
             thread__getResources.start()
-            thread_getFieldsDriver = threading.Thread(target=self.thread_getFieldsDriver)
-            thread_getFieldsDriver.start()
+            self.thread__updateField = threading.Thread(target=self.thread_getFieldsDriver)
+            self.thread__updateField.start()
             """if(self.thread__buildingList):
                 self.thread__buildingList.terminate()
                 self.thread__buildingList = threading.Thread(target=self.thread_getBuildingListDriver)
@@ -243,12 +244,13 @@ class AppController:
     def Navigate_Resources(self):
         element = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.resourcesViewLocator)))
         element.click()
-        """if(self.thread__buildingList):
+        if(self.thread__buildingList):
                self.thread__buildingList.terminate()
         thread_getBuildingList = threading.Thread(target=self.thread_getBuildingListDriver)
         thread_getBuildingList.start()
+
         thread_getFieldsDriver = threading.Thread(target=self.thread_getFieldsDriver)
-        thread_getFieldsDriver.start()"""
+        thread_getFieldsDriver.start()
     #TODO change into an .env file and add it to git ignore
     def loadLoginCreds(self):
         self.mainWindow.inputEmail.setPlainText("kelkor664455@gmail.com")
