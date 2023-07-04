@@ -109,6 +109,7 @@ class AppController:
         self.currentTab = "resources"
         self.mainWindow = mainWindow
         self.thread__buildingList= None
+        self.thread__updateField= None
         mainWindow.buttonlogin.clicked.connect(lambda: self.loginclicked(mainWindow))
         self.loadLoginCreds()
         
@@ -234,42 +235,46 @@ class AppController:
             thread__getResources.start()
             thread_getFieldsDriver = threading.Thread(target=self.thread_getFieldsDriver)
             thread_getFieldsDriver.start()
-            if(self.thread__buildingList):
-               self.thread__buildingList._stop()
-            self.thread__buildingList = threading.Thread(target=self.thread_getBuildingListDriver)
-            self.thread__buildingList.start()
+            """if(self.thread__buildingList):
+                self.thread__buildingList.terminate()
+                self.thread__buildingList = threading.Thread(target=self.thread_getBuildingListDriver)
+                self.thread__buildingList.start()"""
 
     def Navigate_Resources(self):
         element = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.resourcesViewLocator)))
         element.click()
-        if(self.thread__buildingList):
-               self.thread__buildingList._stop()
+        """if(self.thread__buildingList):
+               self.thread__buildingList.terminate()
         thread_getBuildingList = threading.Thread(target=self.thread_getBuildingListDriver)
         thread_getBuildingList.start()
         thread_getFieldsDriver = threading.Thread(target=self.thread_getFieldsDriver)
-        thread_getFieldsDriver.start()
+        thread_getFieldsDriver.start()"""
     #TODO change into an .env file and add it to git ignore
     def loadLoginCreds(self):
         self.mainWindow.inputEmail.setPlainText("kelkor664455@gmail.com")
         self.mainWindow.inputPassword.setText("123456789")
         self.mainWindow.world.setPlainText("https://ts2.x1.international.travian.com/")
 
-    def updateFieldDriver(self,i):
-        def closure():   
-            print(i)
-            self.currentTab = "field"
-            fieldlocator=f"//a[@href='/build.php?id={i}']"
-            element = self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator)))
+    def thread__updatFieldDriver(self,i):
+        print(i)
+        self.currentTab = "field"
+        fieldlocator=f"//a[@href='/build.php?id={i}']"
+        element = self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator)))
+        element.click()
+        buildbutton="//button[contains(@class,'green build')]"
+        try:
+            element = self.wait.until(EC.visibility_of_element_located((By.XPATH, buildbutton)))
             element.click()
-            buildbutton="//button[contains(@class,'green build')]"
-            try:
-                element = self.wait.until(EC.visibility_of_element_located((By.XPATH, buildbutton)))
-                element.click()
-            except:
-                self.Navigate_Resources()
-            self.currentTab = "resources"
-            
+        except:
+            self.Navigate_Resources()
+        self.currentTab = "resources"
+
+    def updateFieldDriver(self,i):
+        def closure():
+            self.thread__updateField = threading.Thread(target=self.thread__updatFieldDriver,args=(i,)) 
+            self.thread__updateField.start()
         return closure
+    
     
 class mainWindow(QMainWindow):
     def __init__(self):
