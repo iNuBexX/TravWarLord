@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QMainWindow, QLabel
 from time import sleep
 from datetime import datetime, timedelta
 import time
-
+import traceback
 import threading 
 
 from PyQt5.QtCore import QObject, pyqtSignal
@@ -75,6 +75,7 @@ class FieldsDataObject(QObject):
     field_signal17 = pyqtSignal(str,str)
     field_signal18 = pyqtSignal(str,str)
 
+    BuildingTimer_signal = pyqtSignal(datetime)
   
     def __init__(self):
         super().__init__()
@@ -83,7 +84,7 @@ class FieldsDataObject(QObject):
     @property
     def field(self,i):
         return getattr(self, f"_field{i}")
-
+ 
     def setfield(self, value,i):
         setattr(self, f"_field{i}",value) 
         #self._field = value
@@ -98,7 +99,7 @@ class AppController:
         self.resourcesViewLocator = "//a[contains(@class,'village resourceView')]"
         self.resources_data_object = ResourcesDataObject()
         self.fields_data_object = FieldsDataObject()
-        #TODO fix this (changes with world)
+        #TODO fix this (changes with world make it more general)
         self.lumberStrogeLocator ="//div[@id='l1']"
         self.clayStorageLocator ="//div[@id='l2']"
         self.ironStorageLocator ="//div[@id='l3']"
@@ -106,20 +107,18 @@ class AppController:
         self.isLoggedIn= False
         self.driver = None
         self.wait = None
+        self.buildingTimer=None
         self.resourcesWindow = None
         self.currentTab = "resources"
         self.mainWindow = mainWindow
         self.thread__buildingList= None
-        self.thread__updateField= None
+        self.thread__CurrentFieldUpdateTimer= None
+        self.zero_time = datetime.strptime("0:00:00", "%H:%M:%S")
         mainWindow.buttonlogin.clicked.connect(lambda: self.loginclicked(mainWindow))
         self.loadLoginCreds()
-        
-        
+
         #self.ui.labelEmail.setStyleSheet("color: rgb(255, 255, 255);")
-        #self.ui.labelPassword.setStyleSheet("color: rgb(255, 255, 255);")
-    
-  
-    
+        #self.ui.labelPassword.setStyleSheet("color: rgb(255, 255, 255);")   
     def thread__loginDriver(self,mail, password,world):
         print("login thread")
         self.driver = webdriver.Chrome()
@@ -156,56 +155,71 @@ class AppController:
                 self.resources_data_object.crops = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.cropsStorageLocator))).text
                 sleep(3)
             #TODO set self data signal thingies here
-    def thread_getFieldsDriver(self):
-        for i in range(1,19):
-            fieldlocator=f"//a[@href='/build.php?id={i}']"
-            self.fields_data_object.setfield(self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator))).text,i)
-
+    def thread__getFieldsDriver(self):
+        while(self.isLoggedIn): 
+            if(self.currentTab=="resources"):
+                for i in range(1,19):
+                    fieldlocator=f"//a[@href='/build.php?id={i}']"
+                    try:
+                        self.fields_data_object.setfield(self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator))).text,i)
+                        
+                    except:
+                        print('something went wrong with buildings profiles aquirment')
+            sleep(4)
             #self.resources_data_object = self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator))).text
             #setattr(self.fields_data_object, f"field{i}",self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator))).text)
-    def thread_getBuildingListDriver(self):
-        try:
-            timer ="//div[@class='buildingList']//ul//span[@class='timer']"
-            print(timer)
-            time_str = self.wait.until(EC.visibility_of_element_located((By.XPATH, timer))).text
-            print(time_str)
-            initial_time = datetime.strptime(time_str, "%H:%M:%S")
-            zero_time = datetime.strptime("0:00:00", "%H:%M:%S")
-            item = QtWidgets.QTableWidgetItem()
-            self.resourcesWindow.tableWidget.setItem(0, 1, item)
-            
-            while initial_time > zero_time:
-                
-                # Format and print the current time
+    #TODO study number of threads 
+    def thread__getCurrentBuildingTimerLoop(self):
+        while(self.isLoggedIn):
+            if(self.currentTab=="resources"):
+                try:
+                    timer ="//div[@class='buildingList']//ul//span[@class='timer']"
+                    building = "class='name'"
+                    time_str = self.wait.until(EC.visibility_of_element_located((By.XPATH, timer))).text
+                    if(self.resourcesWindow.tableWidget.item(0, 1)==None):
+                        print("no item at first row first column adding one ..")
+                  
+                        item = QtWidgets.QTableWidgetItem()
+                        self.resourcesWindow.tableWidget.setItem(0, 1, item)
+                    self.buildingTimer = datetime.strptime(time_str, "%H:%M:%S")
+                               #TODO investigate
+                    
+                    self.fields_data_object.BuildingTimer_signal.emit(datetime.strptime(time_str, "%H:%M:%S"))# = datetime.strptime(time_str, "%H:%M:%S")
+                    #self.resourcesWindow.tableWidget.item(0, 1).setText(self.buildingTimer.strftime("%H:%M:%S"))
+                    #print(self.fields_data_object.BuildingTimer_signal)
+                    #self.resourcesWindow.tableWidget.viewport().update()
+                    
+                    
+                        
+                    #print(self.buildingTimer)
 
-                
-                
-                # Decrement the time by 1 second
-                initial_time -= timedelta(seconds=1)
+                    #TODO check how usefull this really is
+                    #item = QtWidgets.QTableWidgetItem()
+                    #self.resourcesWindow.tableWidget.setItem(0, 1, item)
 
-                # Pause for 1 second before the next iteration
-                time.sleep(1)
-                self.resourcesWindow.tableWidget.item(0, 1).setText(initial_time.strftime("%H:%M:%S"))
-                self.resourcesWindow.tableWidget.viewport().update()
-                #print(initial_time.strftime("%H:%M:%S"))
-             
-        except:
-            print("no buildings")
-
-
+                except Exception as e:
+                    # Catching the exception and printing the stack trace
+                    traceback.print_exc()
+                    pass
+            time.sleep(1)
+    def GUI_updateTimer(self,time):
+        self.resourcesWindow.tableWidget.item(0, 1).setText(time.strftime("%H:%M:%S"))
+        self.resourcesWindow.tableWidget.viewport().update()
+        pass
     def GUI_updateLumber(self,amount):
         self.resourcesWindow.label_10.setText(amount)
     def GUI_updateClay(self,amount):
         self.resourcesWindow.label_11.setText(amount)
     def GUI_updateCrops(self,amount):
-        self.resourcesWindow.label_12.setText(amount)
-    def GUI_updateIron(self,amount):
         self.resourcesWindow.label_13.setText(amount)
+    def GUI_updateIron(self,amount):
+        self.resourcesWindow.label_12.setText(amount)
     def GUI_updateField(self,level,i):
         #setattr(self.resourcesWindow,f"fieldlabel{i}",amount)
         getattr(self.resourcesWindow,f"fieldlabel{i}").setText(f"{level}")
        
        # self.resourcesWindow.fieldlabel.setText(amount)
+    
     def loginclicked(self,ui_MainWindow):
         mail = ui_MainWindow.inputEmail.toPlainText()
         password = ui_MainWindow.inputPassword.text()
@@ -218,7 +232,7 @@ class AppController:
         if(self.isLoggedIn == True):
             self.resourcesWindow = Rwindow.Ui_MainWindow()
             self.resourcesWindow .setupUi(self.mainWindow)
-      
+            #TODO could clean this up 
             for i in range(1,19):
                 getattr(self.resourcesWindow,f"pushButton_fieldlabel{i}").clicked.connect(self.updateFieldDriver(f"{i}"))
             
@@ -226,36 +240,48 @@ class AppController:
             self.resources_data_object.clay_signal.connect(self.GUI_updateClay)
             self.resources_data_object.iron_signal.connect(self.GUI_updateIron)
             self.resources_data_object.crops_signal.connect(self.GUI_updateCrops)
+            self.fields_data_object.BuildingTimer_signal.connect(self.GUI_updateTimer)
+
+            #TODO could clean this up 
             for i in range(1,19):
                 getattr(self.fields_data_object, f"field_signal{i}").connect(lambda level, fieldnumber: self.GUI_updateField(level,fieldnumber))
-            #TODO use files for memory to load in queue
+            
+            #TODO use files from memory to load in queue
+            #self.fields_data_object.BuildingTimer.connect(self.BuildingTimer)
 
             self.resourcesWindow.tableWidget.setRowCount(1)
             
             thread__getResources = threading.Thread(target=self.thread__getResourcesDriver)
             thread__getResources.start()
-            self.thread__updateField = threading.Thread(target=self.thread_getFieldsDriver)
+            self.thread__updateField = threading.Thread(target=self.thread__getFieldsDriver)
             self.thread__updateField.start()
-            """if(self.thread__buildingList):
-                self.thread__buildingList.terminate()
-                self.thread__buildingList = threading.Thread(target=self.thread_getBuildingListDriver)
-                self.thread__buildingList.start()"""
 
+            self.thread__buildingList=threading.Thread(target=self.thread__getCurrentBuildingTimerLoop)
+            self.thread__buildingList.start()
+           
+            item = QtWidgets.QTableWidgetItem()
+            self.resourcesWindow.tableWidget.setItem(0, 1, item)
+       
+    #TODO a theory of mine says that if u connect in main thread the warning shows if u try to update the signal in a different one 
     def Navigate_Resources(self):
         element = self.wait.until(EC.visibility_of_element_located((By.XPATH, self.resourcesViewLocator)))
         element.click()
-        if(self.thread__buildingList):
-               self.thread__buildingList.terminate()
-        thread_getBuildingList = threading.Thread(target=self.thread_getBuildingListDriver)
-        thread_getBuildingList.start()
 
-        thread_getFieldsDriver = threading.Thread(target=self.thread_getFieldsDriver)
-        thread_getFieldsDriver.start()
+
+        #thread_getBuildingList = threading.Thread(target=self.thread_getBuildingListDriver)
+        #thread_getBuildingList.start()
+
+        #thread_getFieldsDriver = threading.Thread(target=self.thread_getFieldsDriver)
+        #thread_getFieldsDriver.start()
+
+        #thread_getFieldsDriver = threading.Thread(target=self.thread_getBuildingListDriver)
+        #thread_getFieldsDriver.start()
+        
     #TODO change into an .env file and add it to git ignore
     def loadLoginCreds(self):
         self.mainWindow.inputEmail.setPlainText("kelkor664455@gmail.com")
         self.mainWindow.inputPassword.setText("123456789")
-        self.mainWindow.world.setPlainText("https://ts2.x1.international.travian.com/")
+        self.mainWindow.world.setPlainText("https://ts3.x1.europe.travian.com/dorf1.php")
 
     def thread__updatFieldDriver(self,i):
         print(i)
@@ -268,7 +294,8 @@ class AppController:
             element = self.wait.until(EC.visibility_of_element_located((By.XPATH, buildbutton)))
             element.click()
         except:
-            self.Navigate_Resources()
+            print("couldn't update")
+        self.Navigate_Resources()
         self.currentTab = "resources"
 
     def updateFieldDriver(self,i):
