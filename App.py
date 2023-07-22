@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QCoreApplication, Qt,Q_ARG
 from PyQt5.QtWidgets import QMainWindow, QLabel
 from time import sleep
 from datetime import datetime, timedelta
@@ -76,6 +77,8 @@ class FieldsDataObject(QObject):
     field_signal18 = pyqtSignal(str,str)
 
     BuildingTimer_signal = pyqtSignal(datetime)
+    BuildingName_signal= pyqtSignal(str,str)
+
   
     def __init__(self):
         super().__init__()
@@ -95,11 +98,15 @@ class FieldsDataObject(QObject):
 class AppController:
 
     def __init__(self,mainWindow):   
+        #self.
         #TODO this feels like it doesn't belong here 
         self.resourcesViewLocator = "//a[contains(@class,'village resourceView')]"
         self.resources_data_object = ResourcesDataObject()
         self.fields_data_object = FieldsDataObject()
-        #TODO fix this (changes with world make it more general)
+        #TODO initialize signals here 
+        self.buildingNameSignal = pyqtSignal(str)
+        
+        #TODO fix this (changes with world make it more general) ... looks like fixed verify-
         self.lumberStrogeLocator ="//div[@id='l1']"
         self.clayStorageLocator ="//div[@id='l2']"
         self.ironStorageLocator ="//div[@id='l3']"
@@ -173,24 +180,20 @@ class AppController:
         while(self.isLoggedIn):
             if(self.currentTab=="resources"):
                 try:
-                    timer ="//div[@class='buildingList']//ul//span[@class='timer']"
-                    building = "class='name'"
-                    time_str = self.wait.until(EC.visibility_of_element_located((By.XPATH, timer))).text
-                    if(self.resourcesWindow.tableWidget.item(0, 1)==None):
-                        print("no item at first row first column adding one ..")
-                  
-                        item = QtWidgets.QTableWidgetItem()
-                        self.resourcesWindow.tableWidget.setItem(0, 1, item)
+                    timerLocator ="//div[@class='buildingList']//ul//span[@class='timer']"
+                    buildingLocator = "//div[@class='name']"
+                    levelLocator = "//span[@class='lvl']"
+                    level_str = self.wait.until(EC.visibility_of_element_located((By.XPATH, levelLocator))).text
+                    time_str = self.wait.until(EC.visibility_of_element_located((By.XPATH, timerLocator))).text
+                    building_str =  self.wait.until(EC.visibility_of_element_located((By.XPATH, buildingLocator))).text
                     self.buildingTimer = datetime.strptime(time_str, "%H:%M:%S")
-                               #TODO investigate
-                    
                     self.fields_data_object.BuildingTimer_signal.emit(datetime.strptime(time_str, "%H:%M:%S"))# = datetime.strptime(time_str, "%H:%M:%S")
-                    #self.resourcesWindow.tableWidget.item(0, 1).setText(self.buildingTimer.strftime("%H:%M:%S"))
+                    self.fields_data_object.BuildingName_signal.emit(building_str.replace(level_str, ""),level_str)
+
+
+                   #self.resourcesWindow.tableWidget.item(0, 1).setText(self.buildingTimer.strftime("%H:%M:%S"))
                     #print(self.fields_data_object.BuildingTimer_signal)
                     #self.resourcesWindow.tableWidget.viewport().update()
-                    
-                    
-                        
                     #print(self.buildingTimer)
 
                     #TODO check how usefull this really is
@@ -202,6 +205,11 @@ class AppController:
                     traceback.print_exc()
                     pass
             time.sleep(1)
+    def GUI_updateBuildingName(self,building,lvl):
+        self.resourcesWindow.tableWidget.item(0, 0).setText(building)
+        self.resourcesWindow.tableWidget.item(0,2).setText('Ongoing')
+        self.resourcesWindow.tableWidget.item(0, 3).setText(lvl)
+        pass
     def GUI_updateTimer(self,time):
         self.resourcesWindow.tableWidget.item(0, 1).setText(time.strftime("%H:%M:%S"))
         self.resourcesWindow.tableWidget.viewport().update()
@@ -241,7 +249,7 @@ class AppController:
             self.resources_data_object.iron_signal.connect(self.GUI_updateIron)
             self.resources_data_object.crops_signal.connect(self.GUI_updateCrops)
             self.fields_data_object.BuildingTimer_signal.connect(self.GUI_updateTimer)
-
+            self.fields_data_object.BuildingName_signal.connect(self.GUI_updateBuildingName)
             #TODO could clean this up 
             for i in range(1,19):
                 getattr(self.fields_data_object, f"field_signal{i}").connect(lambda level, fieldnumber: self.GUI_updateField(level,fieldnumber))
@@ -261,6 +269,11 @@ class AppController:
            
             item = QtWidgets.QTableWidgetItem()
             self.resourcesWindow.tableWidget.setItem(0, 1, item)
+            item = QtWidgets.QTableWidgetItem()
+            self.resourcesWindow.tableWidget.setItem(0, 0, item)
+            item = QtWidgets.QTableWidgetItem()
+            self.resourcesWindow.tableWidget.setItem(0, 2, item)
+
        
     #TODO a theory of mine says that if u connect in main thread the warning shows if u try to update the signal in a different one 
     def Navigate_Resources(self):
