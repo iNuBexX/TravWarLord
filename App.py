@@ -76,8 +76,8 @@ class FieldsDataObject(QObject):
     field_signal17 = pyqtSignal(str,str)
     field_signal18 = pyqtSignal(str,str)
 
-    BuildingTimer_signal = pyqtSignal(datetime)
-    BuildingName_signal= pyqtSignal(str,str)
+    CurrentBuildingTimer_signal = pyqtSignal(datetime,str,str)
+    #BuildingName_signal= pyqtSignal(str,str)
 
   
     def __init__(self):
@@ -105,7 +105,7 @@ class AppController:
         self.fields_data_object = FieldsDataObject()
         #TODO initialize signals here 
         self.buildingNameSignal = pyqtSignal(str)
-        
+        self.isBuilding = False
         #TODO fix this (changes with world make it more general) ... looks like fixed verify-
         self.lumberStrogeLocator ="//div[@id='l1']"
         self.clayStorageLocator ="//div[@id='l2']"
@@ -117,11 +117,12 @@ class AppController:
         self.buildingTimer=None
         self.resourcesWindow = None
         self.currentTab = "resources"
+        self.buildingList = []
         self.mainWindow = mainWindow
         self.thread__buildingList= None
         self.thread__CurrentFieldUpdateTimer= None
         self.zero_time = datetime.strptime("0:00:00", "%H:%M:%S")
-        mainWindow.buttonlogin.clicked.connect(lambda: self.loginclicked(mainWindow))
+        mainWindow.buttonlogin.clicked.connect(lambda: self.login(mainWindow))
         self.loadLoginCreds()
 
         #self.ui.labelEmail.setStyleSheet("color: rgb(255, 255, 255);")
@@ -176,19 +177,27 @@ class AppController:
             #self.resources_data_object = self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator))).text
             #setattr(self.fields_data_object, f"field{i}",self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator))).text)
     #TODO study number of threads 
-    def thread__getCurrentBuildingTimerLoop(self):
+    def thread__Builder(self):
         while(self.isLoggedIn):
             if(self.currentTab=="resources"):
                 try:
                     timerLocator ="//div[@class='buildingList']//ul//span[@class='timer']"
                     buildingLocator = "//div[@class='name']"
                     levelLocator = "//span[@class='lvl']"
+
                     level_str = self.wait.until(EC.visibility_of_element_located((By.XPATH, levelLocator))).text
+
                     time_str = self.wait.until(EC.visibility_of_element_located((By.XPATH, timerLocator))).text
                     building_str =  self.wait.until(EC.visibility_of_element_located((By.XPATH, buildingLocator))).text
-                    self.buildingTimer = datetime.strptime(time_str, "%H:%M:%S")
-                    self.fields_data_object.BuildingTimer_signal.emit(datetime.strptime(time_str, "%H:%M:%S"))# = datetime.strptime(time_str, "%H:%M:%S")
-                    self.fields_data_object.BuildingName_signal.emit(building_str.replace(level_str, ""),level_str)
+                    self.isBuilding =True
+                    self.fields_data_object.CurrentBuildingTimer_signal.emit(datetime.strptime(time_str, "%H:%M:%S"),building_str.replace(level_str, ""),level_str)# = datetime.strptime(time_str, "%H:%M:%S")
+                    #check if timer == 0:0:0
+                    if self.isBuilding and len(self.buildingList)>0:
+                        #self.updateFieldDriver(self.buildingList[0])
+
+                        pass
+                        #break
+                    
 
 
                    #self.resourcesWindow.tableWidget.item(0, 1).setText(self.buildingTimer.strftime("%H:%M:%S"))
@@ -196,39 +205,58 @@ class AppController:
                     #self.resourcesWindow.tableWidget.viewport().update()
                     #print(self.buildingTimer)
 
-                    #TODO check how usefull this really is
-                    #item = QtWidgets.QTableWidgetItem()
-                    #self.resourcesWindow.tableWidget.setItem(0, 1, item)
+         
 
                 except Exception as e:
+                    self.isBuilding=False
+                    print(f"changing isbuilding to {self.isBuilding}")
+                    #TODO could be trouble
+                    #self.isBuilding = False
                     # Catching the exception and printing the stack trace
-                    traceback.print_exc()
+                    #traceback.print_exc()
                     pass
+            #TODO could make it stop at 01 pleas fix
             time.sleep(1)
-    def GUI_updateBuildingName(self,building,lvl):
-        self.resourcesWindow.tableWidget.item(0, 0).setText(building)
+
+    def GUI_Builder(self,time,building,lvl):
+        #self.resourcesWindow.tableWidget.item(0, 0).setText(building)
+        self.resourcesWindow.tableWidget.item(0, 1).setText(time.strftime("%H:%M:%S"))
         self.resourcesWindow.tableWidget.item(0,2).setText('Ongoing')
         self.resourcesWindow.tableWidget.item(0, 3).setText(lvl)
-        pass
-    def GUI_updateTimer(self,time):
-        self.resourcesWindow.tableWidget.item(0, 1).setText(time.strftime("%H:%M:%S"))
         self.resourcesWindow.tableWidget.viewport().update()
         pass
-    def GUI_updateLumber(self,amount):
+    def GUI_AddToBuilderList(self,building):
+        self.resourcesWindow.tableWidget.setRowCount(self.resourcesWindow.tableWidget.rowCount()+1)
+        item = QtWidgets.QTableWidgetItem()
+        self.resourcesWindow.tableWidget.setItem(self.resourcesWindow.tableWidget.rowCount()-1, 0, item)
+        #TODO verify production too then 
+        self.resourcesWindow.tableWidget.item(self.resourcesWindow.tableWidget.rowCount()-1, 0).setText(building['buildingTitle'].split()[0])
+        item = QtWidgets.QTableWidgetItem()
+        self.resourcesWindow.tableWidget.setItem(self.resourcesWindow.tableWidget.rowCount()-1, 1, item)
+        self.resourcesWindow.tableWidget.item(self.resourcesWindow.tableWidget.rowCount()-1, 1).setText('some time later ')
+        item = QtWidgets.QTableWidgetItem()
+        self.resourcesWindow.tableWidget.setItem(self.resourcesWindow.tableWidget.rowCount()-1, 2, item)
+        self.resourcesWindow.tableWidget.item(self.resourcesWindow.tableWidget.rowCount()-1, 2).setText('waiting')
+        item = QtWidgets.QTableWidgetItem()
+        self.resourcesWindow.tableWidget.setItem(self.resourcesWindow.tableWidget.rowCount()-1, 3, item)
+        self.resourcesWindow.tableWidget.item(self.resourcesWindow.tableWidget.rowCount()-1, 3).setText(building['buildingTitle'].split()[1]+" "+building['buildingTitle'].split()[2])
+        pass
+    def GUI_StockUpdateLumber(self,amount):
         self.resourcesWindow.label_10.setText(amount)
-    def GUI_updateClay(self,amount):
+    def GUI_StockUpdateClay(self,amount):
         self.resourcesWindow.label_11.setText(amount)
-    def GUI_updateCrops(self,amount):
+    def GUI_StockUpdateCrops(self,amount):
         self.resourcesWindow.label_13.setText(amount)
-    def GUI_updateIron(self,amount):
+    def GUI_StockUpdateIron(self,amount):
         self.resourcesWindow.label_12.setText(amount)
+    
     def GUI_updateField(self,level,i):
         #setattr(self.resourcesWindow,f"fieldlabel{i}",amount)
         getattr(self.resourcesWindow,f"fieldlabel{i}").setText(f"{level}")
        
        # self.resourcesWindow.fieldlabel.setText(amount)
     
-    def loginclicked(self,ui_MainWindow):
+    def login(self,ui_MainWindow):
         mail = ui_MainWindow.inputEmail.toPlainText()
         password = ui_MainWindow.inputPassword.text()
         world = ui_MainWindow.world.toPlainText()
@@ -244,12 +272,12 @@ class AppController:
             for i in range(1,19):
                 getattr(self.resourcesWindow,f"pushButton_fieldlabel{i}").clicked.connect(self.updateFieldDriver(f"{i}"))
             
-            self.resources_data_object.lumber_signal.connect(self.GUI_updateLumber)
-            self.resources_data_object.clay_signal.connect(self.GUI_updateClay)
-            self.resources_data_object.iron_signal.connect(self.GUI_updateIron)
-            self.resources_data_object.crops_signal.connect(self.GUI_updateCrops)
-            self.fields_data_object.BuildingTimer_signal.connect(self.GUI_updateTimer)
-            self.fields_data_object.BuildingName_signal.connect(self.GUI_updateBuildingName)
+            self.resources_data_object.lumber_signal.connect(self.GUI_StockUpdateLumber)
+            self.resources_data_object.clay_signal.connect(self.GUI_StockUpdateClay)
+            self.resources_data_object.iron_signal.connect(self.GUI_StockUpdateIron)
+            self.resources_data_object.crops_signal.connect(self.GUI_StockUpdateCrops)
+            self.fields_data_object.CurrentBuildingTimer_signal.connect(self.GUI_Builder)
+           #self.fields_data_object.BuildingName_signal.connect(self.GUI_updateBuildingName)
             #TODO could clean this up 
             for i in range(1,19):
                 getattr(self.fields_data_object, f"field_signal{i}").connect(lambda level, fieldnumber: self.GUI_updateField(level,fieldnumber))
@@ -264,7 +292,7 @@ class AppController:
             self.thread__updateField = threading.Thread(target=self.thread__getFieldsDriver)
             self.thread__updateField.start()
 
-            self.thread__buildingList=threading.Thread(target=self.thread__getCurrentBuildingTimerLoop)
+            self.thread__buildingList=threading.Thread(target=self.thread__Builder)
             self.thread__buildingList.start()
            
             item = QtWidgets.QTableWidgetItem()
@@ -273,6 +301,8 @@ class AppController:
             self.resourcesWindow.tableWidget.setItem(0, 0, item)
             item = QtWidgets.QTableWidgetItem()
             self.resourcesWindow.tableWidget.setItem(0, 2, item)
+            item = QtWidgets.QTableWidgetItem()
+            self.resourcesWindow.tableWidget.setItem(0, 3, item)
 
        
     #TODO a theory of mine says that if u connect in main thread the warning shows if u try to update the signal in a different one 
@@ -300,17 +330,49 @@ class AppController:
         print(i)
         self.currentTab = "field"
         fieldlocator=f"//a[@href='/build.php?id={i}']"
+       
         element = self.wait.until(EC.visibility_of_element_located((By.XPATH, fieldlocator)))
         element.click()
-        buildbutton="//button[contains(@class,'green build')]"
-        try:
-            element = self.wait.until(EC.visibility_of_element_located((By.XPATH, buildbutton)))
-            element.click()
-        except:
-            print("couldn't update")
+        print(self.isBuilding)
+        if(self.isBuilding==False):       
+            buildbutton="//button[contains(@class,'green build')]"
+            
+            try:
+                element = self.wait.until(EC.visibility_of_element_located((By.XPATH, buildbutton)))
+                element.click()
+                self.isBuilding=True
+            except:
+                pass
+                #buildingorder = {}
+                """buildingorder['wood_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r1Big']/parent::div//span"))).text
+                buildingorder['clay_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r2Big']/parent::div//span"))).text
+                buildingorder['iron_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r3Big']/parent::div//span"))).text
+                buildingorder['crops_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r4Big']/parent::div//span"))).text
+                buildingorder['consumption_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='cropConsumptionBig']/parent::div//span"))).text
+                buildingorder['buildingTitle'] = self.wait.until(EC.visibility_of_element_located((By.XPATH, "//h1[@class='titleInHeader']"))).text
+                self.buildingList.append(buildingorder)
+                print(buildingorder)
+                self.isBuilding=False"""""
+                #TODO could be  lack of resources here
+                print("couldn't update")
+            
+
+
+        else:
+            buildingorder = {}
+            buildingorder['field'] = i
+            buildingorder['wood_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r1Big']/parent::div//span"))).text
+            buildingorder['clay_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r2Big']/parent::div//span"))).text
+            buildingorder['iron_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r3Big']/parent::div//span"))).text
+            buildingorder['crops_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r4Big']/parent::div//span"))).text
+            buildingorder['consumption_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='cropConsumptionBig']/parent::div//span"))).text
+            buildingorder['buildingTitle'] = self.wait.until(EC.visibility_of_element_located((By.XPATH, "//h1[@class='titleInHeader']"))).text
+            
+            self.buildingList.append(buildingorder)
+            self.GUI_AddToBuilderList(buildingorder)
+            print(self.buildingList)
         self.Navigate_Resources()
         self.currentTab = "resources"
-
     def updateFieldDriver(self,i):
         def closure():
             self.thread__updateField = threading.Thread(target=self.thread__updatFieldDriver,args=(i,)) 

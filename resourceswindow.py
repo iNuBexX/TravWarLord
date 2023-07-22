@@ -478,7 +478,7 @@ class Ui_MainWindow(object):
         self.label_3.setText(_translate("MainWindow", "clay"))
         self.label_10.setText(_translate("MainWindow", "200000"))
         item = self.tableWidget.verticalHeaderItem(0)
-        item.setText(_translate("MainWindow", "building"))
+        #item.setText(_translate("MainWindow", "building"))
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "building          "))
         item = self.tableWidget.horizontalHeaderItem(1)
