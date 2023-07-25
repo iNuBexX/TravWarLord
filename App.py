@@ -209,7 +209,7 @@ class AppController:
 
                 except Exception as e:
                     self.isBuilding=False
-                    print(f"changing isbuilding to {self.isBuilding}")
+                    #print(f"changing isbuilding to {self.isBuilding}")
                     #TODO could be trouble
                     #self.isBuilding = False
                     # Catching the exception and printing the stack trace
@@ -219,7 +219,7 @@ class AppController:
             time.sleep(1)
 
     def GUI_Builder(self,time,building,lvl):
-        #self.resourcesWindow.tableWidget.item(0, 0).setText(building)
+        self.resourcesWindow.tableWidget.item(0, 0).setText(building)
         self.resourcesWindow.tableWidget.item(0, 1).setText(time.strftime("%H:%M:%S"))
         self.resourcesWindow.tableWidget.item(0,2).setText('Ongoing')
         self.resourcesWindow.tableWidget.item(0, 3).setText(lvl)
@@ -325,6 +325,19 @@ class AppController:
         self.mainWindow.inputEmail.setPlainText("kelkor664455@gmail.com")
         self.mainWindow.inputPassword.setText("123456789")
         self.mainWindow.world.setPlainText("https://ts3.x1.europe.travian.com/dorf1.php")
+    
+    def shedualBuilding(self,i):
+        buildingorder = {}
+        buildingorder['field'] = i
+        buildingorder['wood_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r1Big']/parent::div//span"))).text
+        buildingorder['clay_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r2Big']/parent::div//span"))).text
+        buildingorder['iron_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r3Big']/parent::div//span"))).text
+        buildingorder['crops_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r4Big']/parent::div//span"))).text
+        buildingorder['consumption_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='cropConsumptionBig']/parent::div//span"))).text
+        buildingorder['buildingTitle'] = self.wait.until(EC.visibility_of_element_located((By.XPATH, "//h1[@class='titleInHeader']"))).text
+        
+        self.buildingList.append(buildingorder)
+        self.GUI_AddToBuilderList(buildingorder)
 
     def thread__updatFieldDriver(self,i):
         print(i)
@@ -342,37 +355,20 @@ class AppController:
                 element.click()
                 self.isBuilding=True
             except:
+                self.shedualBuilding(i)
                 pass
-                #buildingorder = {}
-                """buildingorder['wood_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r1Big']/parent::div//span"))).text
-                buildingorder['clay_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r2Big']/parent::div//span"))).text
-                buildingorder['iron_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r3Big']/parent::div//span"))).text
-                buildingorder['crops_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r4Big']/parent::div//span"))).text
-                buildingorder['consumption_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='cropConsumptionBig']/parent::div//span"))).text
-                buildingorder['buildingTitle'] = self.wait.until(EC.visibility_of_element_located((By.XPATH, "//h1[@class='titleInHeader']"))).text
-                self.buildingList.append(buildingorder)
-                print(buildingorder)
-                self.isBuilding=False"""""
-                #TODO could be  lack of resources here
+                
                 print("couldn't update")
             
 
 
         else:
-            buildingorder = {}
-            buildingorder['field'] = i
-            buildingorder['wood_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r1Big']/parent::div//span"))).text
-            buildingorder['clay_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r2Big']/parent::div//span"))).text
-            buildingorder['iron_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r3Big']/parent::div//span"))).text
-            buildingorder['crops_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='r4Big']/parent::div//span"))).text
-            buildingorder['consumption_Requirment'] =self.wait.until(EC.visibility_of_element_located((By.XPATH, "//*[@class='cropConsumptionBig']/parent::div//span"))).text
-            buildingorder['buildingTitle'] = self.wait.until(EC.visibility_of_element_located((By.XPATH, "//h1[@class='titleInHeader']"))).text
+            self.shedualBuilding(i)
             
-            self.buildingList.append(buildingorder)
-            self.GUI_AddToBuilderList(buildingorder)
             print(self.buildingList)
         self.Navigate_Resources()
         self.currentTab = "resources"
+    
     def updateFieldDriver(self,i):
         def closure():
             self.thread__updateField = threading.Thread(target=self.thread__updatFieldDriver,args=(i,)) 
